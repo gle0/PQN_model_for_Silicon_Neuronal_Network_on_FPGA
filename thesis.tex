@@ -1,0 +1,160 @@
+\documentclass[12pt,titlepage]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[acronym, toc]{glossaries}
+\usepackage[style=ieee, url=false, isbn=false]{biblatex}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{amsmath,amsthm,amsfonts} %triple integral
+\usepackage{siunitx}
+% \usepackage{named}
+\usepackage{float}
+% \usepackage{subfigure}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{circuitikz}
+\usepackage{adjustbox}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{footnote}
+\usepackage{xcolor}
+\usepackage{bookmark}
+\usepackage{setspace}
+\usepackage{etoolbox}
+\usepackage{afterpage}
+\usepackage{csquotes}
+\usepackage{soul}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
+\captionsetup{font={stretch=1.3}} %1.2
+\captionsetup{width=0.9\textwidth, labelfont=bf, format=plain, font=it}
+
+\newgeometry{
+top=1.4in,
+bottom=1.4in,
+outer=1.35in,
+inner=1.35in,
+}
+
+\makeglossaries
+
+\newacronym{fpga}{FPGA}{Field Programmable Gate Array}
+\newacronym{pqn}{PQN}{Piecewise Quadratic Neuron}
+\newacronym{sinn}{SiNN}{Silicon Neural Network}
+\newacronym{snn}{SNN}{Spiking Neural Network}
+\newacronym{ram}{RAM}{Random Access Memory}
+\newacronym{rom}{ROM}{Read-Only Memory}
+\newacronym{rwm}{RWM}{Read-Write Memory}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{dnn}{DNN}{Deep Neural Network}
+\newacronym{cnn}{CNN}{Convolutional Neural Network}
+\newacronym{rnn}{RNN}{Recurrent Neural Network}
+\newacronym{an}{AN}{Artificial Neuron}
+\newacronym{sn}{SN}{Spiking Neuron}
+\newacronym{ai}{AI}{Artificial Intelligence}
+\newacronym{tbi}{TBI}{Traumatic Brain Injury}
+\newacronym{mea}{MEA}{Microelectrode Array}
+\newacronym{rs}{RS}{Regular Spiking}
+\newacronym{fs}{FS}{Fast Spiking}
+\newacronym{ib}{IB}{Intrinsically Bursting}
+\newacronym{lts}{LTS}{Low Threshold Spiking}
+\newacronym{cmos}{CMOS}{Complementary Metal-Oxide-Semiconductor}
+\newacronym{ff}{FF}{Flip Flop}
+\newacronym{dff}{DFF}{Delay Flip Flop}
+\newacronym{pld}{PLD}{Programmable Logic Device}
+\newacronym{prom}{PROM}{Programmable Read-Only Memory}
+\newacronym{pal}{PAL}{Programmable Array Logic}
+\newacronym{cpld}{CPLD}{Complex Programmable Logic Device}
+\newacronym{eprom}{EPROM}{Erasable Programmable Read-Only Memory}
+\newacronym{pla}{PLA}{Programmable Logic Array}
+\newacronym{le}{LE}{Logic Element}
+\newacronym{clb}{CLB}{Complex Logic Block}
+\newacronym{lut}{LUT}{Look-Up Table}
+\newacronym{asic}{ASIC}{Application Specific Integrated Circuit}
+\newacronym{assp}{ASSP}{Application Specific Standard Product}
+\newacronym{vhdl}{VHDL}{Very High-Speed Integrated Circuit (VHSIC) Hardware Description Language}
+\newacronym{hdl}{HDL}{Hardware Description Language}
+\newacronym{uart}{UART}{Universal Asynchronous Receiver-Transmitter}
+\newacronym{ap}{AP}{Action Potential}
+\newacronym{if}{IF}{Integrate-and-Fire}
+\newacronym{lif}{LIF}{Leaky Integrate-and-Fire}
+\newacronym{qif}{QIF}{Quadratic Integrate-and-Fire}
+\newacronym{eif}{EIF}{Exponential Integrate-and-Fire}
+\newacronym{adex}{AdEX}{Adaptive Exponential Integrate-and-Fire}
+\newacronym{ifb}{IFB}{Integrate-and-Fire-or-Burst}
+\newacronym{izh}{IZH}{Izhikevich}
+\newacronym{hh}{HH}{Hodgkin-Huxley}
+\newacronym{prc}{PRC}{phase-resetting curve}
+\newacronym{dssn}{DSSN}{Digital Spiking Silicon Neuron}
+\newacronym{eb}{EB}{Elliptic Bursting}
+\newacronym{pb}{PB}{Parabolic Bursting}
+\newacronym{gals}{GALS}{Globally Asynchronous Locally Synchronous}
+\newacronym{ip}{IP}{Intellectual Property}
+\newacronym{mux}{MUX}{Multiplexer}
+\newacronym{cpg}{CPG}{Central Pattern Generator}
+\newacronym{pc}{PC}{Personal Computer}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,  % color of internal links
+    urlcolor=black,    % color of external links
+    citecolor=blue  % color of citation links
+}
+
+\addbibresource{biblio.bib}
+
+\renewbibmacro*{volume+number+eid}{%
+  \printfield{volume}%
+  \setunit*{\addnbspace}
+  \printfield{number}
+  \setunit{\addcomma\space}
+  \printfield{eid}}
+\DeclareFieldFormat[article]{number}{\mkbibparens{#1}}
+
+\setstretch{1.5}
+
+\begin{document}
+\input{pagtitle_LM_en.tex}
+\afterpage{\blankpage}
+\newpage
+\begin{flushright}
+    \textit{\Large A nonno Raffaele}
+\end{flushright}
+\newpage
+\input{Summary.tex}
+\newpage
+% \input{Ringraziamenti.tex}
+% \newpage
+% \input{Acknowledgements.tex}
+% \newpage
+\tableofcontents
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+\newpage
+\input{chp1.tex}
+\newpage
+\input{chp2.tex}
+\newpage
+\input{chp3.tex}
+\newpage
+\input{chp4.tex}
+\newpage
+\input{chp5.tex}
+\newpage
+\input{chp6.tex}
+\newpage
+
+\setstretch{1.1}
+
+\printglossary[type=\acronymtype]
+\printglossary[title=Special Terms, toctitle=List of terms]
+
+\printbibliography[heading=bibintoc, title={Bibliography}]
+\end{document}

@@ -1,0 +1,553 @@
+\chapter{Digital Logic and FPGA}
+\label{ch2}
+% citing youtubeeee
+Although information is a disembodied thing, in order to process it, it’s necessary to give it a physical form \cite{CarverMead}. Any physical quantity that can be easily manipulated can be used to represent information. Electrical current, air or fluid pressure, and physical position have been used to build processing systems. However, electric signals became universally predominant due to the ease and cost-effectiveness of fabricating intricate systems through \acrfull{cmos} integrated circuits.\\
+Electric signals can be analog or digital, both are pivotal in transmitting the information. Analog circuits translate information into electric pulses with varying amplitudes, embodying a continuous spectrum, whereas digital technology employs a binary format (zero or one), with each bit symbolising two discrete amplitudes (minimum and maximum). The prevalence of digital systems can be attributed to their ability to process, transport, and store information without succumbing to distortion induced by noise. This is made possible by the discrete nature inherent to digital data.\\
+
+\section{Logic Gates}
+To process and manipulate binary information, logical primitives are essential — very simple operations on one or more binary inputs. AND, OR, and NOT are the elementary ones. By combining these primitives, we can create fundamental modules such as decoders, multiplexers, encoders, etc., which serve as the foundational components for every digital circuit.\\
+A 2-bit multiplexer is just two AND gates, one NOT gate, and one OR gate and a series of wires. This module (Figure \ref{fig:MUX}) has two 1-bit inputs and, based on the value of the selector (SEL) bit, outputs one of the two inputs.\\
+
+\begin{figure}[hbt!]
+        \centering
+        \begin{subfigure}{0.7\textwidth}
+          \centering
+          \begin{circuitikz}
+            % Inputs
+            \draw (0,4) node[left] {$B$} -- ++(0.5,0);
+            \draw (0,2) node[left] {$\text{SEL}$} -- ++(0.5,0);
+            \draw (0,0) node[left] {$A$} -- ++(0.5,0);
+          
+            % Multiplexer
+            \draw (0.5,4) -- ++(1.5,0) node[and port, anchor=in 1] (and1) {AND};
+            \draw (0.5,2) node[not port, anchor=in] (not) {NOT};
+            \draw (0.5,2) to[short, *-] (0.5,3.4) -- (and1.in 2);
+            \draw (0.5,0) -- ++(1.5,0) node[and port, anchor=in 2] (and2) {AND};
+            \draw (not.out) -- ++(0.1,0) -- (and2.in 1);
+            
+            % Output
+            \draw (and1.out) -- ++(0.5,-1.4) node[or port, anchor=in 1] (or) {OR};
+            \draw (and2.out) -- (or.in 2);
+            \draw (or.out) -- ++(0.5,0) node[right] {$\text{OUT}$};
+          \end{circuitikz}
+          \caption{}
+          \label{fig:MUXa}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.25\textwidth}
+          \centering
+          \begin{adjustbox}{width=1\textwidth}
+          \begin{tabular}{ccc|c}
+              \textbf{SEL} & \textbf{A} & \textbf{B} & \textbf{OUT} \\
+              \hline
+              0 & 0 & 0 & 0 \\
+              0 & 0 & 1 & 0 \\
+              0 & 1 & 0 & 1 \\
+              0 & 1 & 1 & 1 \\
+              1 & 0 & 0 & 0 \\
+              1 & 0 & 1 & 1 \\
+              1 & 1 & 0 & 0 \\
+              1 & 1 & 1 & 1 \\
+            \end{tabular}
+        \end{adjustbox}
+          \caption{}
+          \label{fig:MUXb}
+        \end{subfigure}
+        \caption[Multiplexer]{(a) One possible multiplexer’s schematics; (b) multiplexer’s truth table: the output is A when SEL is 0 and B when SEL is 1.}
+\label{fig:MUX}
+\end{figure}
+
+A 2-bit decoder (Figure \ref{fig:decoder}) can be constructed by employing two NOT gates and four AND gates. It takes a binary input and transforms it into a one-hot vector. It’s a vector with all its bits set to 0 except for one.\\
+
+\begin{figure}[hbt!]
+    \centering
+    \begin{subfigure}{0.7\textwidth}
+      \centering
+      \begin{circuitikz}
+        % Inputs
+        \draw (0,0) node[left] {$A1$} -- ++(3.55,0);
+        \draw[line width=1pt] (0,2) node[left] {$A0$} -- ++(3.65,0);
+      
+        % NOT gates
+        \draw (4,0) node[not port, scale=0.7] (not1) {NOT};
+        \draw (4,2) node[not port, scale=0.7] (not2) {NOT};
+        % \draw (not1.in) -- (0,0) node[left] {$A_{1}$};
+        % \draw [line width=2pt] (not2.in) -- (0,2) node[left] {$A_{0}$};
+      
+        % AND gates
+        \draw (9,-0.3) node[and port] (and1) {AND};
+        \draw (9,1.75) node[and port] (and0) {AND};
+        \draw (2,-4) node[and port, rotate=270] (and3) {AND};
+        \draw (5,-4) node[and port, rotate=270] (and2) {AND};
+      
+        % Outputs
+        \draw (and0.out) -- ++(0.5,0) node[right] {$D_0$};
+        \draw (and1.out) -- ++(0.5,0) node[right] {$D_1$};
+        \draw (and2.out) -- ++(0,-0.5) node[right] {$D_2$};
+        \draw (and3.out) -- ++(0,-0.5) node[right] {$D_3$};  
+      
+        % Labels
+        \draw[line width=2pt] (4.35,2) -- (7.85,2);
+        \draw[line width=2pt] (not2.out) -- ++(0.8,0) -- ++ (0,-4.85);
+        \draw (not1.out) -- (and1.in 1);
+        \draw (7,0) |- (and0.in 2);
+        \draw[line width=1pt] (1.72,2) -- ++ (0,-4.85);
+        \draw (2.3,0) -- (and3.in 1);
+        \draw (2.3,-2) -| (and2.in 2);
+        \draw[line width=1pt] (1.72,-0.57) -- (7.85,-0.57);
+      
+      \end{circuitikz}
+      \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.25\textwidth}
+      \centering
+      \begin{adjustbox}{width=1\textwidth}
+        \begin{tabular}{cc|cccc}
+          $A_1$ & $A_0$ & $D_3$ & $D_2$ & $D_1$ & $D_0$ \\
+          \hline
+          0 & 0 & 0 & 0 & 0 & 1 \\
+          0 & 1 & 0 & 0 & 1 & 0 \\
+          1 & 0 & 0 & 1 & 0 & 0 \\
+          1 & 1 & 1 & 0 & 0 & 0 \\
+          \end{tabular}
+    \end{adjustbox}
+      \caption{}
+    \end{subfigure}
+    \caption[Decoder]{(a) One possible decoder's schematics; (b) decoder's truth table:
+    a binary \(n\)-bit input i translated into a one-hot \(2^n\)-bit vector.}
+\label{fig:decoder}
+\end{figure}
+
+Although these components can appear too simple, they work as the foundation of the whole digital logic. Indeed, a decoder, in conjunction with multiple OR gates, enables the creation of \acrfull{rom}, a module which allows permanent information storage. A \acrshort{rom} can implement any arbitrary logic function by storing the corresponding truth table within its memory. By accepting an address as input, the \acrshort{rom} outputs the corresponding value stored in its table at that address. The term ’read-only’ signifies that the values within the table are predetermined and hard-wired during the \acrshort{rom}'s manufacturing process, rendering them immutable.\\
+
+The previous elements are all part of the category of combinational logic, where the current state of the inputs solely determines the output of a module. In contrast, a circuit whose output relies on preceding input states is called a sequential circuit. For instance, in a majority circuit — a logic circuit that takes n inputs and outputs a 1 if at least half of the inputs are 1 — the output is only determined on the count of 1s in the current input state. Conversely, a circuit that yields 1 when the count of 1s in the inputs surpasses the count in the preceding input state is classified as sequential.\\
+
+It’s clear that the sequential logic needs to account for time changes in the circuit. To do so, it’s necessary to store bits of information dynamically. The latch (Figure \ref{fig:latch}) represents the simplest represents the simplest form of memory in sequential circuits. It’s built using just two NOR gates (an OR gate with its input inverted). It is an asynchronous circuit, i.e., its output can change any time its input changes.\\
+
+\begin{figure}[hbt!]
+  \begin{center}
+    \begin{circuitikz}
+      \draw (0,0) node[american nor port] (nor2) {NOR};
+      \draw (0,2) node[american nor port] (nor1) {NOR};
+      
+      \draw (nor1.in 1) -- ++(-1,0) node[left] {$R$};
+      \draw (nor2.in 2) -- ++(-1,0) node[left] {$S$};
+      
+      \draw (nor1.out) -- ++(1,0) node[right] {$Q$};
+      \draw (nor2.out) -- ++(1,0) node[right] {$\overline{Q}$};
+
+      \draw[color=red] (0.7,0) -- (0.7,1.2) -| (nor1.in 2);
+      \draw (0.3,2) -- (0.3,0.8) -| (nor2.in 1);
+
+      \draw (0.7,0) node[circle, fill=red, draw, inner sep=1pt]{};
+      \draw (0.3,2) node[circle, fill=black, draw, inner sep=1pt]{};
+
+  \end{circuitikz}
+  \end{center}
+  \caption[Latch]{The latch is composed of two inputs, Set (S) and Reset (R), one output (Q) and its inverted ($\overline{Q}$). 
+  The NOR gate outputs a 0 if at least one of its inputs is 1. 
+  So, starting with $S=1$ and $R=0$, $\overline{Q}$ becames 0 and $Q$ 1, because the inputs of the top gate are both 0.
+  Switching the Set to 0, the output Q remains 1, because it is an input for the bottom gate. In this way, the bit is successfully stored. 
+  To change the output Q it's necessary to change the R input to 1. In this way, the Q turns back to 0.}
+  \label{fig:latch}
+\end{figure}
+
+The \acrfull{ff} is a synchronous latch. The synchronous element is introduced through a clock control signal that allows changes in the output only at specific times. In fact, it is also known as a gated or clocked SR latch. This makes the \acrshort{ff} the foundational component of sequential logic circuits. It’s built by adding two AND gates to the latch.\\
+A \acrfull{dff} (or data flip-flop) (Figure \ref{fig:Dff}) is more functional than the FF because it has only one input called data that works as the set input, while its inverted value is the reset. Introducing an enable signal to the output of the \acrshort{dff} transforms creates a register. It works by coping its input to the output only when its enabling bit is high; otherwise, the output maintains its prior value.
+
+\begin{figure}[hbt!]
+\begin{center}
+  \begin{circuitikz}
+    \draw (0,0) node[american nor port] (nor2) {NOR};
+    \draw (0,2) node[american nor port] (nor1) {NOR};
+  
+    \draw (-2,-0.28) node[and port] (and2) {AND};
+    \draw (-2,2.28) node[and port] (and1) {AND};
+    \draw (-5,2.56) node[not port] (not) {NOT};
+
+    \draw (-4,1) -- ++(-0.5,0) node[left] {CLK};
+    \draw (-6.5,-0.58) -- ++(-0.5,0) node[left] {D};
+  
+    \draw (and1.in 2) |- (-4,1);
+    \draw (and2.in 1) |- (-4,1);
+  
+    \draw (not.in) -| (-6.5,-0.58);
+    \draw (not.out) -- (and1.in 1);
+    \draw (and2.in 2) -- (-6.5,-0.58);
+    
+    \draw (nor1.in 1) -- (and1.out);
+    \draw (nor2.in 2) -- (and2.out);
+    
+    \draw (nor1.out) -- ++(1,0) node[right] {$Q$};
+    \draw (nor2.out) -- ++(1,0) node[right] {$\overline{Q}$};
+  
+    \draw[color=red] (0.7,0) -- (0.7,1.2) -| (nor1.in 2);
+    \draw (0.3,2) -- (0.3,0.8) -| (nor2.in 1);
+  
+    \draw (0.7,0) node[circle, fill=red, draw, inner sep=1pt]{};
+    \draw (0.3,2) node[circle, fill=black, draw, inner sep=1pt]{};
+  \end{circuitikz}
+\end{center}
+\caption[Delay flip-flop]{The output Q reflects the D input only when the clock transitions from 0 to 1. 
+From one rising edge to the other the module simply store the current value even if the data input change.
+When clock input is high, the data is transferred to the output of the FF and when the clock input is low, the output of the FF is held in its previous state.}
+\label{fig:Dff}
+\end{figure}
+
+The essential storage element for any computing system, the \acrfull{rwm}, is built by exploiting a demultiplexer, a multiplexer, and several registers. Often referred to as \acrfull{ram} for historical reasons, read–write memories share similarities with \acrshort{rom}s, and it has an additional feature consisting of the modification (writing) to the stored contents of the table. Unlike \acrshort{rom}s, where the data at each location is constant, in \acrshort{ram}, the stored data is retrieved from a register, making it dynamic and changeable \cite{Dally}.\\
+Similarly to \acrshort{rom}s, \acrshort{ram}s need an address that specifies which storage element one wants to operate with. This address simply determines which register needs to change value. This is done by activating only its enable signal while inactivating all the others.\\
+
+\section{History of Programmable Logic Devices}
+The chips commonly encountered in daily interactions with technology usually operate on simple digital logic. These hardware components are designed to perform specific functions, with their wires and gates configured in a way that remains unalterable. However, there exists another category of devices known as Programmable Digital Logic.\\
+A \acrfull{pld} is an electronic component used for constructing reconfigurable digital circuits. Unlike digital logic built using fixed-function logic gates, a \acrshort{pld} has a more general organisation. It lacks a predefined function at the time of manufacturing, and it must be programmed before being integrated into a circuit.\\
+The evolution of \acrshort{pld}s traces back to Simple \acrshort{pld}s, including \acrfull{prom} and \acrfull{pal}, progressing to \acrfull{cpld}, culminating in the development of \acrshort{fpga}.\\
+
+In 1956, the \acrshort{prom} was invented. 
+Figure \ref{fig:pld notation} shows the different 
+notations between conventional and programmable 
+gates.\\
+
+\begin{figure}[hbt!]
+        \centering
+        \begin{circuitikz}
+        %\tikzset{and port1/.style= {and port, external pins={white,white,white}}}
+        \draw (0,0) node[and port, scale=2, number inputs=3] (andgate1) {AND};
+        %\draw (andgate1.input 1) -- ++(-0.5,0) node[left] {$A_{1}$};
+        % \draw (andgate1.in 2) -- ++(-0.5,0) node[left] {$A_{2}$};
+        % \draw (-3.25,0) -- (-2.3,0);
+        % \draw (andgate1.in 3) -- ++(-0.5,0) node[left] {$A_{3}$};
+    
+        \draw (7,0) node[and port, scale=2] (andgate2) {AND};
+        %\draw (andgate2.in 1) -- ++(-2,0);
+        \draw (2.5,0) -- (4.7,0);
+        \draw (2.5,-0.5) -- (2.5,0.5);
+        \draw (3.5,-0.5) -- (3.5,0.5);
+        \draw (4.5,-0.5) -- (4.5,0.5);
+    
+        \draw (2.5,0) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (2.5,0.5) node[above]{A};
+        \draw (3.5,0.5) node[above]{B};
+        \draw (4.5,0) node[circle, draw, inner sep=1pt]{};
+        \draw (4.5,0.5) node[above]{C};
+    
+        % \draw (andgate1.out) -- ++(0.5,0) node[right] {$OUT$};
+        % \draw (andgate2.out) -- ++(0.5,0) node[right] {$OUT$};
+        \end{circuitikz}
+    \caption[Programmable Logic Devices notation]{(a) Standard logic notation; With a programmable logic notation (b) there can be three possible link types: hardwired (A), not connected (B) and programmable (C).}
+    \label{fig:pld notation}
+\end{figure}
+
+
+\begin{figure}[hbt!]
+    \begin{center}
+      \begin{circuitikz}
+        % Inputs
+        \draw (0,0) -- (0,-6);
+        \draw (2,0) -- (2,-6);
+        \draw (4,0) -- (4,-6);
+    
+        \draw (0,0) node[above] {$A$};
+        \draw (2,0) node[above] {$B$};
+        \draw (4,0) node[above] {$C$};
+    
+        % NOT gates
+        \draw (1,-1.5) node[not port, rotate=270, scale=0.75] (not1) {NOT};
+        \draw (3,-1.5) node[not port, rotate=270, scale=0.75] (not2) {NOT};
+        \draw (5,-1.5) node[not port, rotate=270, scale=0.75] (not3) {NOT};
+    
+        % NOT gates connections
+        \draw (0,-0.5) -| (not1.in);
+        \draw (2,-0.5) -| (not2.in);
+        \draw (4,-0.5) -| (not3.in);
+    
+        \draw (not1.out) -- ++ (0,-4);
+        \draw (not2.out) -- ++ (0,-4);
+        \draw (not3.out) -- ++ (0,-4);
+    
+        % AND plane
+        \draw (7.5,-2.5) node[and port, scale=0.75] (and1) {AND};
+        \draw (7.5,-3.5) node[and port, scale=0.75] (and2) {AND};
+        \draw (7.5,-4.5) node[and port, scale=0.75] (and3) {AND};
+        \draw (7.5,-5.5) node[and port, scale=0.75] (and4) {AND};
+    
+        \draw (-0.5,-2.5) -- (6.65,-2.5);
+        \draw (-0.5,-3.5) -- (6.65,-3.5);
+        \draw (-0.5,-4.5) -- (6.65,-4.5);
+        \draw (-0.5,-5.5) -- (6.65,-5.5);
+    
+        \draw (and1.out) -- ++ (4,0);
+        \draw (and2.out) -- ++ (4,0);
+        \draw (and3.out) -- ++ (4,0);
+        \draw (and4.out) -- ++ (4,0);
+    
+        % OR plane
+        \draw (8.5,-2) -- (8.5,-6);
+        \draw (10.5,-2) -- (10.5,-6);
+    
+        \draw (8.5,-2.5) node[circle, draw, inner sep=1pt]{};
+        \draw (8.5,-3.5) node[circle, draw, inner sep=1pt]{};
+        \draw (8.5,-4.5) node[circle, draw, inner sep=1pt]{};
+        \draw (8.5,-5.5) node[circle, draw, inner sep=1pt]{};
+    
+        \draw (10.5,-2.5) node[circle, draw, inner sep=1pt]{};
+        \draw (10.5,-3.5) node[circle, draw, inner sep=1pt]{};
+        \draw (10.5,-4.5) node[circle, draw, inner sep=1pt]{};
+        \draw (10.5,-5.5) node[circle, draw, inner sep=1pt]{};
+    
+        \draw (8.5,-6.7) node[or port, scale=0.75, rotate=270] (or1) {OR};
+        \draw (10.5,-6.7) node[or port, scale=0.75, rotate=270] (or2) {OR};
+    
+        \draw (or1.out) -- ++ (0,-0.5) node[below]{$O_{1}$};
+        \draw (or2.out) -- ++ (0,-0.5) node[below]{$O_{2}$};
+    
+        % Hardwired
+    
+        \draw (0,-2.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (0,-3.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (1,-4.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (2,-2.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (2,-4.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (3,-5.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (4,-4.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (5,-3.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        \draw (5,-5.5) node[circle, fill=black, draw, inner sep=1pt]{};
+        
+    \end{circuitikz}
+    \end{center}
+    \caption[Programmable Read Only Memory]{The PROM structure has a fixed AND plane (left) and
+    a programmable OR plane (right). This difference is expressed
+    in the notation used for the links: hardwired or not connected
+    in the first case and programmable in the second.}
+    \label{fig:prom1}
+\end{figure}
+
+As shown in \ref{fig:prom1}, the PROM comprises a 
+fixed AND plane, or $product\ terms$, followed by a 
+programmable OR plane, where $sum\ terms$ can be 
+altered by modifying the memory contents. In the AND plane, links are either hardwired or left unconnected.\\
+The working principle is straightforward, programming the device means determining which link will be activated in each column. To do so, there’s the need to store an array of bits for any column of the OR plane.\\
+For example, when aiming for the first output 
+($O_{1}$) to embody 
+the function (A AND B) OR (NOT C AND A), the 
+binary array 1100 should be stored in the relative 
+column. This activates only the 
+two first programmable links in the column, while
+the last two remain not connected.\\
+
+After key technological advancements, 
+the \acrfull{eprom} emerged in 1971, 
+followed by the introduction of the \acrfull{pla} in 1975 and the \acrshort{pal} in 1978. 
+The \acrshort{pal}, resembling the \acrshort{prom}, differs in having 
+a fixed OR plane and a programmable AND plane. 
+This architecture demonstrates increased efficiency, 
+as most of the logic functions of interest 
+generally exhibit limited product terms \cite{coursera}.\\
+
+The \acrshort{pal} is the foundational component of the \acrshort{cpld}. 
+These new devices feature a distinct structure; 
+internally, \acrshort{cpld}s typically incorporate multiple 
+instances of a fundamental programmable \acrfull{le} or macrocell, each roughly 
+equivalent to a \acrshort{pal}. Each macrocell can 
+implement a network of various logic gates, 
+which feed into 1 or 2 acrshort{ff}s. These \acrshort{le}s are organised 
+in a column or matrix format on the chip.
+To facilitate more intricate 
+operations, \acrshort{le} can be automatically interconnected 
+with other \acrshort{le}s on the chip through a programmable 
+interconnection network.\\
+However, for designs 
+requiring a substantial number of registers, 
+data transfers, and bus interfaces, these 
+logic-intensive but \acrshort{ff}-limited devices 
+proved less scalability. 
+This limitation prompted 
+the evolution of another \acrshort{pld} architecture, the 
+FPGA \cite{RapidPrototyping}.\\
+
+\section{Field Programmable Gate Array}
+The \acrshort{fpga} was conceived to offer a versatile 
+digital logic device with significant flexibility 
+and functionality. Rather than relying on 
+transistor gates for logic implementation, 
+\acrshort{fpga}s often utilise memory fashioned as lookup 
+tables. Sharing a similar architecture with 
+\acrshort{cpld}s, \acrshort{fpga}s feature smaller logic elements 
+known as \acrfull{clb}. These \acrshort{clb}s contain \acrfull{lut} that can 
+be programmed to execute specific logic 
+functions \cite{WILSON}.\\
+
+An example showing how an LUT can model any gate 
+network is shown in figure \ref{fig:lut}. 
+First, the gate network is converted into a truth table. Given three inputs and one output, an 8-row truth table is generated. Subsequently, this truth table is loaded into the \acrshort{lut} during device programming. To do so, the 8 bits representing the output of the F function are stored in a particular type of \acrshort{ram}.\\
+The three inputs—A, B, and C—serve as address lines for the multiplexers, and the output F, is thus dependent on the values of these inputs. This process enables the \acrshort{lut} to execute the gate network through a \acrshort{ram}, eliminating the need for conventional logic gates.\\
+
+\begin{figure}[hbt!]
+  \begin{center}
+    \begin{subfigure}{0.7\textwidth}
+      \centering
+      \begin{circuitikz}
+      % Inputs
+      \draw (0,1.5) node[left] {$B$} -- ++(0.5,0);
+      \draw (0,0) node[left] {$A$} -- ++(0.5,0);
+      \draw (0,-1.5) node[left] {$C$} -- ++(0.5,0);
+  
+      % AND gates
+      \draw (3,1) node[and port, scale=0.75] (and1) {AND};
+      \draw (3,-1) node[and port, scale=0.75] (and2) {AND};
+  
+      % NOT gate
+      \draw (1,-1.5) node[not port, scale=0.75] (not) {NOT};
+  
+      % OR gate
+      \draw (5,0) node[or port, scale=0.75] (or) {OR};
+  
+      % Output
+      \draw (or.out) -- ++(0.5,0) node[right] {$F$};
+  
+      % Connections
+      \draw (and1.in 2) |- (0,0);
+      \draw (and1.in 1) |- (0,1.5);
+      \draw (and2.in 1) |- (0,0);
+  
+      \draw (not.out) |- (and2.in 2);
+      \draw (or.in 1) -- (and1.out);
+      \draw (or.in 2) -- (and2.out);
+      \end{circuitikz}
+      \caption{}
+    \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.25\textwidth}
+  \centering
+  \begin{adjustbox}{width=0.7\textwidth}
+  \begin{tabular}{ccc|c}
+  $A$ & $B$ & $C$ & $F$ \\
+  \hline
+  0 & 0 & 0 & 0 \\
+  0 & 0 & 1 & 0 \\
+  0 & 1 & 0 & 0 \\
+  0 & 1 & 1 & 0 \\
+  1 & 0 & 0 & 1 \\
+  1 & 0 & 1 & 0 \\
+  1 & 1 & 0 & 1 \\
+  1 & 1 & 1 & 1 \\
+  \end{tabular}
+  \end{adjustbox}
+  \caption{}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}{1\textwidth}
+    \centering
+    \begin{circuitikz}
+    \node[left] at (0,-0.2) {0};
+    \node[left] at (0,-0.8) {0};
+    \node[left] at (0,-2.2) {0};
+    \node[left] at (0,-2.8) {0};
+    \node[left] at (0,-4.2) {1};
+    \node[left] at (0,-4.8) {0};
+    \node[left] at (0,-6.2) {1};
+    \node[left] at (0,-6.8) {1};
+  
+    \tikzset{mux 2by1/.style={muxdemux, muxdemux def={Lh=4, NL=2, Rh=3, NB=1, NT=1,  w=2, square pins=1}}};
+    \draw (2,-0.5) node [mux 2by1, scale=0.5] (mux11) {MUX};
+    \draw (2,-2.5) node [mux 2by1, scale=0.5] (mux12) {MUX};
+    \draw (2,-4.5) node [mux 2by1, scale=0.5] (mux13) {MUX};
+    \draw (4,-1.5) node [mux 2by1, scale=0.5] (mux21) {MUX};
+    
+    \draw (mux11.tpin 1) -- (2,1) node[above] {A};
+    \draw (mux11.lpin 1) -- (0,-0.2);
+    \draw (mux11.lpin 2) -- (0,-0.8);
+  
+    \draw (mux11.bpin 1) -- (mux12.tpin 1);
+    \draw (mux12.lpin 1) -- (0,-2.2);
+    \draw (mux12.lpin 2) -- (0,-2.8);
+  
+    \draw (mux12.bpin 1) -- (mux13.tpin 1);
+    \draw (mux13.lpin 1) -- (0,-4.2);
+    \draw (mux13.lpin 2) -- (0,-4.8);
+  
+    \draw (mux11.rpin 1) -- ++ (0.75,0) |- (mux21.lpin 1);
+    \draw (mux12.rpin 1) -- ++ (0.75,0) |- (mux21.lpin 2);
+  
+    \draw (mux21.tpin 1) -- (4,1) node[above] {B};
+    \tikzset{mux 2by1/.style={muxdemux, muxdemux def={Lh=4, NL=2, Rh=3, NB=0, NT=1,  w=2, square pins=1}}};
+    \draw (2,-6.5) node [mux 2by1, scale=0.5] (mux14) {MUX};
+    \draw (4,-5.5) node [mux 2by1, scale=0.5] (mux22) {MUX};
+    \draw (6,-3.5) node [mux 2by1, scale=0.5] (mux31) {MUX};
+  
+    \draw (mux13.rpin 1) -- ++ (0.75,0) |- (mux22.lpin 1);
+    \draw (mux14.rpin 1) -- ++ (0.75,0) |- (mux22.lpin 2);
+  
+    \draw (mux13.bpin 1) -- (mux14.tpin 1);
+    \draw (mux14.lpin 1) -- (0,-6.2);
+    \draw (mux14.lpin 2) -- (0,-6.8);
+  
+    \draw (mux31.tpin 1) -- (6,1) node[above] {C};
+    \draw (mux31.rpin 1) -- ++(0.5,0) node[right] {F};
+    
+    \draw (mux21.rpin 1) -- ++ (0.75,0) |- (mux31.lpin 1);
+    \draw (mux22.rpin 1) -- ++ (0.75,0) |- (mux31.lpin 2);
+    \draw (mux21.bpin 1) -- (mux22.tpin 1);
+    \end{circuitikz}
+    \caption{}
+  \end{subfigure}
+  \end{center}
+\caption[Look-Up Table in FPGA]{(a) logic gate function; (b) truth table of the function; (c) LUT implementation of the function}
+\label{fig:lut}
+\end{figure}
+
+\acrshort{fpga} compete with \acrfull{asic} and \acrfull{assp}. An \acrshort{assp} is an integrated circuit tailored for a specific application market and is standardised for sale to multiple users. Instead, an \acrshort{asic} is designed and manufactured for sale to a single company.\\
+Due to their tightly controlled configurations, both exhibit compactness, cost-effectiveness, speed, and low power consumption. However, the fixed functionality at the time of manufacture limits their adaptability, as even a small section of the circuit cannot have its functionality altered.\\
+In contrast, \acrshort{fpga}s provide a dynamic solution by allowing adaptation to new standards and enabling hardware reconfiguration for specific applications even after being installed in the field—hence the term 
+\enquote{field-programmable}. This flexibility 
+renders \acrshort{fpga}s a more versatile and 
+cost-effective alternative to the 
+rigid configurations of \acrshort{asic}s and \acrshort{assp}s.\\
+
+\subsection{Programming FPGA: VHDL}
+\label{subsection:VHDL}
+\acrshort{vhdl} and Verilog are the primary \acrshort{hdl} for programming \acrshort{fpga}s. Originating in the 1980s under the U.S. Department of Defence, the \acrfull{vhdl} has evolved into an industry standard for delineating the behaviour and structure of digital systems. \acrshort{vhdl} operates as an \acrshort{hdl}, facilitating the modelling and simulation of digital systems across various levels of abstraction, from system-level down to logic gates \cite{Pellerin}.\\
+While conventional computer languages describe algorithms (sequential execution), \acrshort{vhdl} is specifically tailored to describe hardware (parallel execution). It’s thus a concurrent language: the majority of \acrshort{vhdl} instructions are executed all at the same time.\\
+A \acrshort{vhdl} design comprises a hierarchy of modules, 
+encapsulating design structures that communicate 
+through declared input, output, and bidirectional 
+ports. Different modules are called $entities$, 
+and their functions are described in the 
+$architecture$. The $entity$ construct in \acrshort{vhdl} 
+abstracts circuit functionality to a higher 
+level, promoting modularity and abstraction.\\
+% (Free Range VHDL- no cite).\\
+Internally, an $architecture$ can encompass 
+signal/variable declarations, concurrent and 
+sequential statement blocks, and instances of 
+other modules (sub-hierarchies). Sequential 
+statements are placed only within a 
+block called $process$.\\
+
+\acrshort{vhdl} primarily serves as a tool for simulation, allowing designers to build models that facilitate testing and verification before hardware implementation. Once the simulation yields the expected results, the subsequent step involves compiling the \acrshort{hdl} design. In \acrshort{fpga} programming, a synthesis tool takes the \acrshort{hdl} design as input and transforms it into a network of gates, registers, and wires configured to embody the desired functions. The implementation processes then adapt this network of components to the chosen \acrshort{fpga} model. Lastly, this information is enclosed in a programming (bitstream) file that is uploaded to the \acrshort{fpga}.\\
+
+\subsection{UART communication}
+The communication between the \acrshort{fpga} and the 
+computer in this project is facilitated through 
+the \acrfull{uart}, a widely utilised device-to-device 
+communication protocol with configurable data 
+formats and transmission speeds. In \acrshort{uart}, data 
+bits are transmitted serially, one at a time, 
+from the least significant to the most significant, 
+encapsulated by start and stop bits. A second \acrshort{uart} 
+reconstructs the bits into complete bytes at the 
+receiving end.\\
+The \acrshort{uart} protocol is employed within the project 
+scope to transmit two data between the \acrshort{fpga} and the 
+\acrfull{pc}, specifically the membrane potential (V) and 
+input current (I). Both signals are represented 
+by 18 bits and encoded into 3-byte data through 
+\acrshort{uart} communication. Packets containing this 
+information are transmitted every 0.1 ms from 
+the \acrshort{fpga} to the computer and every 0.1 s from 
+the computer to the \acrshort{fpga}.\\
+The Cmod A7-35T board, housing the Artix-7 \acrshort{fpga}, 
+used in this project supports a maximum baud 
+rate of 4 Mbits/s.

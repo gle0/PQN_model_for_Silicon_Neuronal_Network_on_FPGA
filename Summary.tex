@@ -1,0 +1,32 @@
+\chapter*{Summary}
+Even in the tiniest animal brains, there's a fascinating complexity at work, 
+governing their bodies and actions. Despite being simple, 
+these brains showcase impressive computational skills that are being unraveled. 
+These processing capabilities operate with 
+significantly lower energy consumption compared to computers. The study of 
+the brain and its characteristics offers valuable insights into a novel and 
+highly efficient form of computation that, from the biological world, can 
+be exported to the artificial one.\\
+By adopting this approach, the last decades saw the development of diverse 
+brain-inspired systems. These technologies aim to achieve the flexibility 
+and computational efficiency of biological neural processing systems, 
+characterised by the implementation of neural architectures that tightly 
+integrate processing and memory and the use of a spike-based encoding of the 
+information.\\
+Borrowing these innovative features from biology, neuromorphic engineering 
+represents a transformative approach to computing. Its goal is to create 
+novel, energy-efficient technologies while actively seeking to comprehend, 
+through practical implementation, the remarkable capabilities of the 
+brain.\\
+
+In 2023, the Laboratory for Neuromimetics Systems at the Institute of Industrial Science, University of Tokyo, introduced the \acrfull{pqn} model. Based on a qualitative modelling approach, it outperforms traditional conductance-based models in terms of resource utilisation and power consumption while mimicking their capability of accurately modelling different neural classes. Designed for an efficient digital implementation on a \acrfull{fpga}, it represents a valid tool for constructing large-scale \acrfull{sinn}. \\
+These \acrshort{sinn}s are useful for cognitive computing and computational neuroscience applications. Furthermore, their capability of mimicking the brain functioning at a cell level, utilising low power, made them a promising instrument for the development of innovative neuroprosthetic devices for the treatment of brain disorders.\\
+
+The objective of this thesis is to expand the PQN hardware design, which presents eight different configurations, each one reproducing a distinct neuronal class, with two innovative designs. The first new configuration consists of integrating some of these designs to create a population composed of four electrophysiological classes of cortical and thalamic neurons. In the next one, cell-to-cell variability within each class is implemented by providing each neuron with a heterogeneous set of parameters.\\
+Both projects share the goal of enhancing the resemblance of the \acrshort{sinn} to their biological counterpart. In particular, the modelling of two important biological features, such as diversity in the types of neuronal classes and intraclass variability, represents a step forward in the realisation of a thalamocortical microcircuit.\\
+
+A Xilinx Artix-7 XC7A35T \acrshort{fpga}, integrated 
+within a Digilent cmod A7 board, 
+was used for this project.
+All the source codes are openly accessible on 
+GitHub\footnote{\url{https://github.com/gle0/PQN_thesis}}.

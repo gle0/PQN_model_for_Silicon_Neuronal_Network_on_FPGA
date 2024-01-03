@@ -1,0 +1,626 @@
+\chapter{Design projects}
+\label{ch5}
+This chapter elucidates the innovative work undertaken in this thesis.
+\section{Multiple classes population}
+Classifying cortical neurons into distinct classes provides a fundamental framework for understanding neural diversity. 
+The four prominent cell classes in the cortex are \acrshort{fs}, \acrshort{rs}, 
+\acrshort{ib}, inspired by Connors and Gutnick's classification \cite{CONNORS}, 
+and the LTS cells.\\
+
+RS neurons, characterised by a spiny pyramidal-cell morphology, comprise the 
+predominant cell class in the neocortex. These neurons can exhibit either 
+excitatory or inhibitory characteristics, with the former being more abundant. 
+Moreover, the internal dynamics of these two cell types differ, necessitating 
+the use of distinct models to represent each accurately.\\
+The classification of neurons as excitatory or inhibitory is based on the 
+neurotransmitter synthesised and released at the synapse. Glutamatergic 
+neurons release glutamate, exciting postsynaptic cells, while GABAergic 
+neurons release GABA (\(\gamma\)-aminobutyric acid), inhibiting them. 
+Maintaining a delicate balance between excitation and inhibition is crucial 
+for the precise functioning and plasticity of the nervous system.\\
+Another significant class is the \acrshort{fs} neurons, typically 
+corresponding to aspiny inhibitory neurons.\\
+The \acrshort{ib} neurons, generating bursts of action potentials in response to 
+depolarising stimuli, represent a smaller percentage of cells in the primary 
+sensory cortex.\\
+\acrshort{lts} activity was observed in about 10 \% of intracellularly 
+recorded cells in the 
+cat association cortex in vivo \cite{DestexheLTS}. These \acrshort{lts} neurons 
+resemble the classic \acrshort{rs} response and additionally produce bursts of 
+action potentials. While the LTS cell shares similarities with the thalamic relay 
+cells, key distinctions exist. Thalamic relay cells lack spike-frequency adaptation, 
+eliminating the need for adaptation currents. Furthermore, thalamic relay cells 
+generate more powerful bursts than cortical \acrshort{lts} neurons in both the 
+cortex and thalamus \cite{Pospischil}.\\
+Despite these differences, the \acrshort{lts} class can be utilised to model 
+thalamic neurons. A chip featuring these four neuronal classes can be a robust 
+model for a thalamocortical network and prove valuable in various experimental 
+scenarios, as previously done in other studies, like \cite{Khoyratee}.\\
+
+\subsection{Implementation}
+As illustrated in figure \ref{fig:schematic2}, the principal distinction 
+from the design presented in Chapter \ref{section:PQNimpl} lies in the 
+$PQN\ unit$ module. It features multiple $PQN\ engines$ (Figure \ref{fig:Pdesign1}), each equipped 
+with a corresponding number of \acrshort{ram} blocks.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+        \begin{circuitikz}
+            \ctikzset{multipoles/dipchip/width=2}
+        
+            \node [left] at (-1,2.25) {$UART_{R}$};
+            \node [left] at (-1,1) {$CLK$};
+        
+            \node [below, font=\tiny] at (0,0.4) {$CLK\ generator$};
+            \draw (0,1) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](Clk){}; % , label={Clk generator}
+            \node [right, font=\tiny] at (Clk.bpin 3) {$C_{in}$};
+            \node [left, font=\tiny] at (Clk.bpin 8) {$C$};
+            % \node [left] at (-0.5,2) {$UART_{RXD}$};
+            \draw (Clk.bpin 3) -- (-1,1);
+        
+            \node [below, font=\tiny] at (2,-0.6) {$Trigger\ generator$};
+            \draw (2,0) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](T){}; %, label={Trigger generator}
+            \node [right, font=\tiny] at (T.bpin 3) {C};
+            \node [left, font=\tiny] at (T.bpin 8) {T};
+        
+            \node [above, font=\tiny] at (4,2.6) {$Receiver$};
+            \draw (4,2) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](R){}; %label={I Receiver}
+            \node [right, font=\tiny] at (R.bpin 2) {D};
+            \node [right, font=\tiny] at (R.bpin 3) {C};
+            \node [right, font=\tiny] at (R.bpin 4) {T};
+            \node [left, font=\tiny] at (R.bpin 7) {$I_{3}$};
+            \node [left, font=\tiny] at (R.bpin 8) {$I_{2}$};
+            \node [left, font=\tiny] at (R.bpin 9) {$I_{1}$};
+            \node [left, font=\tiny] at (R.bpin 10) {$I_{0}$};
+            \draw (R.bpin 2) -- (-1,2.25);
+        
+            \node [above, font=\tiny] at (6,2.8) {$PQN_{unit}$};
+            \draw (6,2) node[dipchip, scale=0.5, num pins=12, hide numbers, 
+                no topmark, external pins width=0](PQN){}; %, label={PQN unit}
+            \node [right, font=\tiny] at (PQN.bpin 1) {$I_{0}$};
+            \node [right, font=\tiny] at (PQN.bpin 2) {$I_{1}$};
+            \node [right, font=\tiny] at (PQN.bpin 3) {$I_{2}$};
+            \node [right, font=\tiny] at (PQN.bpin 4) {$I_{3}$};
+            \node [right, font=\tiny] at (PQN.bpin 5) {C};
+            \node [right, font=\tiny] at (PQN.bpin 6) {T};
+            \node [left, font=\tiny] at (PQN.bpin 8) {$V_{3}$};
+            \node [left, font=\tiny] at (PQN.bpin 9) {$V_{2}$};
+            \node [left, font=\tiny] at (PQN.bpin 10) {$V_{1}$};
+            \node [left, font=\tiny] at (PQN.bpin 11) {$V_{0}$};
+        
+            \node [below, font=\tiny] at (8.1,1.2) {$Transmitter$};
+            \draw (8,2) node[dipchip, scale=0.5, num pins=12, hide numbers, 
+                no topmark, external pins width=0](Tr){}; %label={V Transmitter}
+            \node [right, font=\tiny] at (Tr.bpin 1) {$V_{0}$};
+            \node [right, font=\tiny] at (Tr.bpin 2) {$V_{1}$};
+            \node [right, font=\tiny] at (Tr.bpin 3) {$V_{2}$};
+            \node [right, font=\tiny] at (Tr.bpin 4) {$V_{3}$};
+            \node [right, font=\tiny] at (Tr.bpin 5) {C};
+            \node [right, font=\tiny] at (Tr.bpin 6) {T};
+            \node [left, font=\tiny] at (Tr.bpin 9) {Q};
+            \draw (Tr.bpin 10) -- ++ (0.5,0) node[right] {$UART_{T}$};
+        
+            \draw (T.bpin 8) -- ++ (4.5,0) |- (Tr.bpin 6);
+            \draw (T.bpin 8) -- ++ (2.5,0) |- (PQN.bpin 6);
+            \draw (T.bpin 8) -- ++ (0.5,0) |- (R.bpin 4);
+        
+            \draw[color=green] (Clk.bpin 8) -- ++ (6.35,0) |- (Tr.bpin 5); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (4.4,0) |- (PQN.bpin 5); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (2.4,0) |- (R.bpin 3); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (0.4,0) |- (T.bpin 3); %[color=green]
+        
+            \draw (R.bpin 10) -- ++ (0.2,0) |- (PQN.bpin 1);
+            \draw (R.bpin 9) -- ++ (0.2,0) |- (PQN.bpin 2);
+            \draw (R.bpin 8) -- ++ (0.2,0) |- (PQN.bpin 3);
+            \draw (R.bpin 7) -- ++ (0.2,0) |- (PQN.bpin 4);
+
+            \draw (PQN.bpin 8) -- ++ (0.2,0) |- (Tr.bpin 4);
+            \draw (PQN.bpin 9) -- ++ (0.15,0) |- (Tr.bpin 3);
+            \draw (PQN.bpin 10) -- ++ (0.1,0) |- (Tr.bpin 2);
+            \draw (PQN.bpin 11) -- ++ (0.05,0) |- (Tr.bpin 1);
+        
+        \end{circuitikz}
+    \end{center}
+    \caption[Multi-class population schematic diagram]{The schematic diagram for the implementation of a multi class population differs from \ref{fig:schematic} only for the number of currents output of the $receiver$ and thus in the number of voltages calculated by the $PQN\ unit$ and sent to the $transmitter$.}
+    \label{fig:schematic2}
+\end{figure}
+
+\begin{figure}[hbt!]
+    \begin{center}
+    \begin{circuitikz}
+        \ctikzset{multipoles/dipchip/width=2}
+    
+        \node[left] at (2.1,1) {$RS_{exci}\ engine$};
+        \draw (0,0) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](P1){}; % , label={Clk generator}
+        \node [right, font=\tiny] at (P1.bpin 1) {C};
+        \node [right, font=\tiny] at (P1.bpin 2) {$I_{rs}$};
+        \node [right, font=\tiny] at (P1.bpin 3) {$v$};
+        \node [right, font=\tiny] at (P1.bpin 4) {$n$};
+        \node [right, font=\tiny] at (P1.bpin 5) {$q$};
+        \node [left, font=\tiny] at (P1.bpin 8) {$v$};
+        \node [left, font=\tiny] at (P1.bpin 7) {$n$};
+        \node [left, font=\tiny] at (P1.bpin 6) {$q$};
+    
+        \draw (2,0) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](V1){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (V1.bpin 2) {C};
+        \node [right, font=\tiny] at (V1.bpin 3) {D};
+        \node [right, font=\tiny] at (V1.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (V1.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (V1.bpin 8) {Q};
+        \draw (P1.bpin 8) -- (V1.bpin 3);
+    
+        \draw (2,-1) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](N1){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (N1.bpin 2) {C};
+        \node [right, font=\tiny] at (N1.bpin 3) {D};
+        \node [right, font=\tiny] at (N1.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (N1.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (N1.bpin 8) {Q};
+        \draw (P1.bpin 7) -- ++ (0.7,0) |- (N1.bpin 3);
+    
+        \draw (2,-2) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](Q1){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (Q1.bpin 2) {C};
+        \node [right, font=\tiny] at (Q1.bpin 3) {D};
+        \node [right, font=\tiny] at (Q1.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (Q1.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (Q1.bpin 8) {Q};
+        \draw (P1.bpin 6) -- ++ (0.5,0) |- (Q1.bpin 3);
+    
+        \draw[color=red] (Q1.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (Q1.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (N1.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (N1.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (V1.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (V1.bpin 5) -- ++ (-0.1,0);
+        \draw[color=green] (P1.bpin 1) -- ++ (-0.1,0);
+        \draw[color=green] (V1.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (N1.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (Q1.bpin 2) -- ++ (-0.1,0);
+    
+        \draw (Q1.bpin 8) -- ++ (0.6,0) -- ++ (0,4) -- ++ (-4.5,0) -- ++ (0,-2.35) -- (P1.bpin 5);
+        \draw (N1.bpin 8) -- ++ (0.4,0) -- ++ (0,2.7) -- ++ (-4,0) -- ++ (0,-1.87) -- (P1.bpin 4);
+        \draw (V1.bpin 8) -- ++ (0.2,0) -- ++ (0,1.5) -- ++ (-3.5,0) -- ++ (0,-1.5) -- (P1.bpin 3);
+    
+        \node[left] at (7,1) {$FS\ engine$};
+        \draw (5.5,0) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](P2){}; % , label={Clk generator}
+        \node [right, font=\tiny] at (P2.bpin 1) {C};
+        \node [right, font=\tiny] at (P2.bpin 2) {$I_{fs}$};
+        \node [right, font=\tiny] at (P2.bpin 3) {$v$};
+        \node [right, font=\tiny] at (P2.bpin 4) {$n$};
+        \node [right, font=\tiny] at (P2.bpin 5) {$q$};
+        \node [left, font=\tiny] at (P2.bpin 8) {$v$};
+        \node [left, font=\tiny] at (P2.bpin 7) {$n$};
+        \node [left, font=\tiny] at (P2.bpin 6) {$q$};
+    
+        \draw (7.5,0) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](V2){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (V2.bpin 2) {C};
+        \node [right, font=\tiny] at (V2.bpin 3) {D};
+        \node [right, font=\tiny] at (V2.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (V2.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (V2.bpin 8) {Q};
+        \draw (P2.bpin 8) -- (V2.bpin 3);
+    
+        \draw (7.5,-1) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](N2){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (N2.bpin 2) {C};
+        \node [right, font=\tiny] at (N2.bpin 3) {D};
+        \node [right, font=\tiny] at (N2.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (N2.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (N2.bpin 8) {Q};
+        \draw (P2.bpin 7) -- ++ (0.7,0) |- (N2.bpin 3);
+    
+        \draw (7.5,-2) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](Q2){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (Q2.bpin 2) {C};
+        \node [right, font=\tiny] at (Q2.bpin 3) {D};
+        \node [right, font=\tiny] at (Q2.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (Q2.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (Q2.bpin 8) {Q};
+        \draw (P2.bpin 6) -- ++ (0.5,0) |- (Q2.bpin 3);
+    
+        \draw[color=red] (Q2.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (Q2.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (N2.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (N2.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (V2.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (V2.bpin 5) -- ++ (-0.1,0);
+        \draw[color=green] (P2.bpin 1) -- ++ (-0.1,0);
+        \draw[color=green] (V2.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (N2.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (Q2.bpin 2) -- ++ (-0.1,0);
+    
+        \draw (Q2.bpin 8) -- ++ (0.6,0) -- ++ (0,4) -- ++ (-4.5,0) -- ++ (0,-2.35) -- (P2.bpin 5);
+        \draw (N2.bpin 8) -- ++ (0.4,0) -- ++ (0,2.7) -- ++ (-4,0) -- ++ (0,-1.87) -- (P2.bpin 4);
+        \draw (V2.bpin 8) -- ++ (0.2,0) -- ++ (0,1.5) -- ++ (-3.5,0) -- ++ (0,-1.5) -- (P2.bpin 3);
+    
+        \node[left] at (1.5,-4) {$IB\ engine$};
+        \draw (0,-5) node[dipchip, scale=0.3, num pins=12, hide numbers, 
+            no topmark, external pins width=0](P3){}; % , label={Clk generator}
+        \node [right, font=\tiny] at (P3.bpin 1) {C};
+        \node [right, font=\tiny] at (P3.bpin 2) {$I_{ib}$};
+        \node [right, font=\tiny] at (P3.bpin 3) {$v$};
+        \node [right, font=\tiny] at (P3.bpin 4) {$n$};
+        \node [right, font=\tiny] at (P3.bpin 5) {$q$};
+        \node [right, font=\tiny] at (P3.bpin 6) {$u$};
+        \node [left, font=\tiny] at (P3.bpin 10) {$v$};
+        \node [left, font=\tiny] at (P3.bpin 9) {$n$};
+        \node [left, font=\tiny] at (P3.bpin 8) {$q$};
+        \node [left, font=\tiny] at (P3.bpin 7) {$u$};
+    
+        \draw (2,-4.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](V3){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (V3.bpin 2) {C};
+        \node [right, font=\tiny] at (V3.bpin 3) {D};
+        \node [right, font=\tiny] at (V3.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (V3.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (V3.bpin 8) {Q};
+        \draw (P3.bpin 10) -- (V3.bpin 3);
+    
+        \draw (2,-5.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](N3){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (N3.bpin 2) {C};
+        \node [right, font=\tiny] at (N3.bpin 3) {D};
+        \node [right, font=\tiny] at (N3.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (N3.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (N3.bpin 8) {Q};
+        \draw (P3.bpin 9) -- ++ (0.7,0) |- (N3.bpin 3);
+    
+        \draw (2,-6.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](Q3){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (Q3.bpin 2) {C};
+        \node [right, font=\tiny] at (Q3.bpin 3) {D};
+        \node [right, font=\tiny] at (Q3.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (Q3.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (Q3.bpin 8) {Q};
+        \draw (P3.bpin 8) -- ++ (0.5,0) |- (Q3.bpin 3);
+
+        \draw (2,-7.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](U3){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (U3.bpin 2) {C};
+        \node [right, font=\tiny] at (U3.bpin 3) {D};
+        \node [right, font=\tiny] at (U3.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (U3.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (U3.bpin 8) {Q};
+        \draw (P3.bpin 7) -- ++ (0.3,0) |- (U3.bpin 3);
+    
+        \draw[color=red] (Q3.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (Q3.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (N3.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (N3.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (V3.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (V3.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (U3.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (U3.bpin 5) -- ++ (-0.1,0);
+
+        \draw[color=green] (P3.bpin 1) -- ++ (-0.1,0);
+        \draw[color=green] (V3.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (N3.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (Q3.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (U3.bpin 2) -- ++ (-0.1,0);
+    
+        \draw (U3.bpin 8) -- ++ (0.8,0) -- ++ (0,5.2) -- ++ (-5,0) -- ++ (0,-2.7) -- (P3.bpin 6);
+        \draw (Q3.bpin 8) -- ++ (0.6,0) -- ++ (0,4) -- ++ (-4.5,0) -- ++ (0,-2.35) -- (P3.bpin 5);
+        \draw (N3.bpin 8) -- ++ (0.4,0) -- ++ (0,2.7) -- ++ (-4,0) -- ++ (0,-1.89) -- (P3.bpin 4);
+        \draw (V3.bpin 8) -- ++ (0.2,0) -- ++ (0,1.5) -- ++ (-3.5,0) -- ++ (0,-1.52) -- (P3.bpin 3);
+
+        \node[left] at (7.2,-4) {$LTS\ engine$};
+        \draw (5.5,-5) node[dipchip, scale=0.3, num pins=12, hide numbers, 
+            no topmark, external pins width=0](P4){}; % , label={Clk generator}
+        \node [right, font=\tiny] at (P4.bpin 1) {C};
+        \node [right, font=\tiny] at (P4.bpin 2) {$I_{lts}$};
+        \node [right, font=\tiny] at (P4.bpin 3) {$v$};
+        \node [right, font=\tiny] at (P4.bpin 4) {$n$};
+        \node [right, font=\tiny] at (P4.bpin 5) {$q$};
+        \node [right, font=\tiny] at (P4.bpin 6) {$u$};
+        \node [left, font=\tiny] at (P4.bpin 10) {$v$};
+        \node [left, font=\tiny] at (P4.bpin 9) {$n$};
+        \node [left, font=\tiny] at (P4.bpin 8) {$q$};
+        \node [left, font=\tiny] at (P4.bpin 7) {$u$};
+    
+        \draw (7.5,-4.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](V4){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (V4.bpin 2) {C};
+        \node [right, font=\tiny] at (V4.bpin 3) {D};
+        \node [right, font=\tiny] at (V4.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (V4.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (V4.bpin 8) {Q};
+        \draw (P4.bpin 10) -- (V4.bpin 3);
+    
+        \draw (7.5,-5.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](N4){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (N4.bpin 2) {C};
+        \node [right, font=\tiny] at (N4.bpin 3) {D};
+        \node [right, font=\tiny] at (N4.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (N4.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (N4.bpin 8) {Q};
+        \draw (P4.bpin 9) -- ++ (0.7,0) |- (N4.bpin 3);
+    
+        \draw (7.5,-6.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](Q4){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (Q4.bpin 2) {C};
+        \node [right, font=\tiny] at (Q4.bpin 3) {D};
+        \node [right, font=\tiny] at (Q4.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (Q4.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (Q4.bpin 8) {Q};
+        \draw (P4.bpin 8) -- ++ (0.5,0) |- (Q4.bpin 3);
+
+        \draw (7.5,-7.9) node[dipchip, scale=0.3, num pins=10, hide numbers, 
+            no topmark, external pins width=0](U4){}; %, label={Trigger generator}
+        \node [right, font=\tiny] at (U4.bpin 2) {C};
+        \node [right, font=\tiny] at (U4.bpin 3) {D};
+        \node [right, font=\tiny] at (U4.bpin 4) {$wr$};
+        \node [right, font=\tiny] at (U4.bpin 5) {$adr$};
+        \node [left, font=\tiny] at (U4.bpin 8) {Q};
+        \draw (P4.bpin 7) -- ++ (0.3,0) |- (U4.bpin 3);
+    
+        \draw[color=red] (Q4.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (Q4.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (N4.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (N4.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (V4.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (V4.bpin 5) -- ++ (-0.1,0);
+        \draw[color=red] (U4.bpin 4) -- ++ (-0.1,0);
+        \draw[color=blue] (U4.bpin 5) -- ++ (-0.1,0);
+
+        \draw[color=green] (P4.bpin 1) -- ++ (-0.1,0);
+        \draw[color=green] (V4.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (N4.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (Q4.bpin 2) -- ++ (-0.1,0);
+        \draw[color=green] (U4.bpin 2) -- ++ (-0.1,0);
+    
+        \draw (U4.bpin 8) -- ++ (0.8,0) -- ++ (0,5.2) -- ++ (-5,0) -- ++ (0,-2.7) -- (P4.bpin 6);
+        \draw (Q4.bpin 8) -- ++ (0.6,0) -- ++ (0,4) -- ++ (-4.5,0) -- ++ (0,-2.35) -- (P4.bpin 5);
+        \draw (N4.bpin 8) -- ++ (0.4,0) -- ++ (0,2.7) -- ++ (-4,0) -- ++ (0,-1.89) -- (P4.bpin 4);
+        \draw (V4.bpin 8) -- ++ (0.2,0) -- ++ (0,1.5) -- ++ (-3.5,0) -- ++ (0,-1.52) -- (P4.bpin 3);
+
+    \end{circuitikz}
+    \end{center}
+    \caption[Multiple classes population $PQN\ unit$ schematic diagram]{The \acrshort{pqn} unit is composed of 
+    four independent and parallel compartments like the one in figure \ref{fig:PQNunit}.
+    \acrshort{ib} and \acrshort{lts} classes have four-variables, 
+    so their implementation requires an additional \acrshort{ram}. 
+    The $wr$ and $adr$ signals are equal for all the blocks.}
+    \label{fig:Pdesign1}
+    \end{figure}
+
+Within the $PQN\ unit$, four distinct $PQN\ engines$ have been 
+incorporated — RSexci, \acrshort{fs}, \acrshort{lts}, and \acrshort{ib}. 
+The design needs three \acrshort{ram}s for the first two classes and 
+four for the latter two classes. Each class is associated with a unique 
+stimulus current, differing in amplitude. Consequently, each of the four 
+different currents must be transmitted to the respective class.\\
+This required modifications to $transmitter$ and $receiver$, with the first 
+that transfer four voltages 
+and the second that receives four currents and stores them in the four \acrshort{ram}s.
+The baud rate has been adjusted from 1 Mbits/s to 2 Mbit/s because of the increase in 
+the data rate.\\
+Figure \ref{fig:pqn4} shows the simultaneous stimulation of the four 
+different classes with diverse currents.\\
+
+The code relative to this section can be found in 
+the $multiple\_classes$\footnote{\url{https://github.com/gle0/PQN_thesis/tree/main/multiple_classes}} repository on GitHub.\\
+
+\begin{figure}[ht]
+    \begin{center}
+    \includegraphics[width=0.8\linewidth]{img/pqn4.PNG}
+    \end{center}
+    \caption[Simulation of multiple classes population]{Result of the stimulation of RSexci ($V_{0}$), FS ($V_{1}$), IB ($V_{2}$) and LTS ($V_{3}$) classes with a step current of 0.09, 0.1, 0.7 and -0.2, respectively.}
+    \label{fig:pqn4}
+\end{figure}
+
+\clearpage
+
+\section{Cell-to-cell variability}
+
+In constructing thalamocortical networks, including diverse classes is essential, 
+along with modelling the inherent cell-to-cell variability within each 
+class \cite{Pospischil}. Unlike computers with billions of identical gates, 
+neurons in the brain exhibit significant individuality \cite{Stein,Urban}. 
+Even neurons of the same type display considerable variances in their properties, 
+introducing variability to signal processing. While this variability might seem to 
+challenge the reliability of neuronal networks, it has been observed that instead it 
+enhances a system's inherent functional behaviour \cite{Balasubramanian,Perez-Nievez,Zendrikov}. 
+In fact, this intrinsic mechanism contributes to increased network speed, 
+responsiveness, and robustness \cite{Lengler}.\\
+
+\subsection{Implementation}
+
+To exploit the cell-to-cell variability, it’s pivotal to provide each 
+neuron with a heterogeneous set of parameters (seen the PQN model's 
+equations in Chapter \ref{subsection:PQN}). 
+In this project the coefficients discussed in Chapter \ref{section:PQNimpl} 
+are a semplification of those parameters.\\
+In order for each neuron to have a proper set of coefficients, it’s important 
+to make them change at any cycle rather than being constants. In fact, the 
+coefficients in \cite{Nanami} were fixed, allowing for straightforward 
+multiplication using simple shifters and adders. However, this approach is no 
+longer applicable, and a novel solution is required. Instead of constructing 
+hardware around fixed values for the coefficient, the goal is to develop generic 
+hardware capable of accommodating any value.\\
+
+Therefore, there is the need for a $barrel\ shifter$ module 
+(Figure \ref{fig:barrs}) capable of shifting a variable based on a number. 
+This module takes a variable and a 5-bit signal ($shift\ amount$) as input, 
+outputting the variable shifted by the specified number \cite{SchultePillmeier}. 
+The shift amount determines the positions by which the input is shifted.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+        \begin{circuitikz}
+            \draw (0,0) rectangle (2,2.3);
+            \draw (0,1.5) -- (-1,1.5) node[left] {$IN$};
+            \draw (0,0.8) -- (-1,0.8) node[left] {$SHIFT_{AMT}$};
+            \draw (2,1.15) -- ++ (0.5,0) node[right] {$OUT$};
+            \node[scale=2] at (1,1.15) {$BS$};
+        \end{circuitikz}
+    \end{center}
+    \caption[Barrel shifter module]{The barrel shifter is a module composed of many \acrshort{mux}s. 
+    It takes two inputs, one is a variable and the other one serves as the selector for these \acrshort{mux}s. 
+    This module allows to shift a variable by any value.}
+    \label{fig:barrs}
+\end{figure}
+
+Another challenge arises in determining how to store these dynamic coefficients. 
+Since all the values are binary, only the 1 bits are relevant to the multiplication 
+operation. To address this, a strategy is employed to store the positions of 1s 
+exclusively.\\
+For instance, the binary coefficient 0000100110 (10-bit fixed-point, with a 1-bit 
+integer part, equivalent to 0.07421875 in decimal) is encoded by the 
+positions 4, 7, and 8 expressed in a 5-bit notation (00100, 00111, 01000).\\
+The maximum number of 1s that can be stored for each coefficient has been 
+determined as 10 considering the coefficients in \cite{Nanami}. Summing up, 
+ten positional values are stored for each coefficient, with each position 
+expressed using 5 bits (Figure \ref{fig:50bits} top). After doing this, 
+the ten shifted values are summed, giving the result of the multiplication 
+between a variable and a coefficient.\\
+Consequently, for each neuron 17 different 50-bit arrays are stored in the 
+respective \acrshort{rom} block. In cases with fewer than ten 1s, the remaining operations 
+involve a 37-bit shifting, resulting in an empty array. The addition of these null 
+values does not impact the calculation of the coefficient (Figure \ref{fig:50bits} 
+bottom).\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+    \includegraphics[width=1\linewidth]{img/50bitsss.png}
+    \end{center}
+    \caption[Encoding a coefficient in a 50-bits array]{In the first case (top) the coefficient is encoded using 10 1s, in the second (bottom) case less than 10.}
+    \label{fig:50bits}
+\end{figure}
+
+The overall design is illustrated in figure \ref{fig:schematic3}. 
+The modification is focused on the $PQN\ engine$, which incorporates 
+17 \acrshort{rom}s (one for each coefficient) and 10 $barrel\ shifters$ for each \acrshort{rom}.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+        \begin{circuitikz}
+            \ctikzset{multipoles/dipchip/width=2}
+        
+            \node [left] at (-1,2.25) {$UART_{R}$};
+            \node [left] at (-1,0.454) {$CLK$};
+        
+            \node [below, font=\tiny] at (0,-0.15) {$CLK\ generator$};
+            \draw (0,0.454) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](Clk){}; % , label={Clk generator}
+            \node [right, font=\tiny] at (Clk.bpin 3) {$C_{in}$};
+            \node [left, font=\tiny] at (Clk.bpin 8) {$C$};
+            \draw (Clk.bpin 3) -- (-1,0.454);
+        
+            \node [below, font=\tiny] at (2,-1.05) {$Trigger\ generator$};
+            \draw (2,-0.5) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](T){}; %, label={Trigger generator}
+            \node [right, font=\tiny] at (T.bpin 3) {C};
+            \node [left, font=\tiny] at (T.bpin 8) {T};
+        
+            \node [above, font=\tiny] at (4,2.6) {$Receiver$};
+            \draw (4,2) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](R){}; %label={I Receiver}
+            \node [right, font=\tiny] at (R.bpin 2) {D};
+            \node [right, font=\tiny] at (R.bpin 3) {C};
+            \node [right, font=\tiny] at (R.bpin 4) {T};
+            \node [left, font=\tiny] at (R.bpin 8) {Q};
+            \draw (R.bpin 2) -- (-1,2.25);
+        
+            \node [above, font=\tiny] at (6,3.3) {$PQN_{unit}$};
+            \draw (6,2) node[dipchip, scale=0.5, num pins=20, hide numbers, 
+                no topmark, external pins width=0](PQN){}; %, label={PQN unit}
+            \node [right, font=\tiny] at (PQN.bpin 5) {I};
+            \node [right, font=\tiny] at (PQN.bpin 6) {C};
+            \node [right, font=\tiny] at (PQN.bpin 7) {T};
+            \node [left, font=\tiny] at (PQN.bpin 11) {$V_{9}$};
+            \node [left, font=\tiny] at (PQN.bpin 12) {$V_{8}$};
+            \node [left, font=\tiny] at (PQN.bpin 13) {$V_{7}$};
+            \node [left, font=\tiny] at (PQN.bpin 14) {$V_{6}$};
+            \node [left, font=\tiny] at (PQN.bpin 15) {$V_{5}$};
+            \node [left, font=\tiny] at (PQN.bpin 16) {$V_{4}$};
+            \node [left, font=\tiny] at (PQN.bpin 17) {$V_{3}$};
+            \node [left, font=\tiny] at (PQN.bpin 18) {$V_{2}$};
+            \node [left, font=\tiny] at (PQN.bpin 19) {$V_{1}$};
+            \node [left, font=\tiny] at (PQN.bpin 20) {$V_{0}$};
+        
+            \node [below, font=\tiny] at (8.1,0.15) {$Transmitter$};
+            \draw (8,1.72) node[dipchip, scale=0.5, num pins=24, hide numbers, 
+                no topmark, external pins width=0](Tr){}; %label={V Transmitter}
+            \node [right, font=\tiny] at (Tr.bpin 1) {$V_{0}$};
+            \node [right, font=\tiny] at (Tr.bpin 2) {$V_{1}$};
+            \node [right, font=\tiny] at (Tr.bpin 3) {$V_{2}$};
+            \node [right, font=\tiny] at (Tr.bpin 4) {$V_{3}$};
+            \node [right, font=\tiny] at (Tr.bpin 5) {$V_{4}$};
+            \node [right, font=\tiny] at (Tr.bpin 6) {$V_{5}$};
+            \node [right, font=\tiny] at (Tr.bpin 7) {$V_{6}$};
+            \node [right, font=\tiny] at (Tr.bpin 8) {$V_{7}$};
+            \node [right, font=\tiny] at (Tr.bpin 9) {$V_{8}$};
+            \node [right, font=\tiny] at (Tr.bpin 10) {$V_{9}$};
+            \node [right, font=\tiny] at (Tr.bpin 11) {C};
+            \node [right, font=\tiny] at (Tr.bpin 12) {T};
+            \node [left, font=\tiny] at (Tr.bpin 18) {Q};
+            \draw (Tr.bpin 18) -- ++ (0.5,0) node[right] {$UART_{T}$};
+        
+            \draw (T.bpin 8) -- ++ (4.5,0) |- (Tr.bpin 12);
+            \draw (T.bpin 8) -- ++ (2.5,0) |- (PQN.bpin 7);
+            \draw (T.bpin 8) -- ++ (0.5,0) |- (R.bpin 4);
+        
+            \draw[color=green] (Clk.bpin 8) -- ++ (6.35,0) |- (Tr.bpin 11); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (4.4,0) |- (PQN.bpin 6); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (2.4,0) |- (R.bpin 3); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (0.4,0) |- (T.bpin 3); %[color=green]
+        
+            \draw (R.bpin 8) -- ++ (0.2,0) |- (PQN.bpin 5);
+
+            \draw (PQN.bpin 20) -- (Tr.bpin 1);
+            \draw (PQN.bpin 19) -- (Tr.bpin 2);
+            \draw (PQN.bpin 18) -- (Tr.bpin 3);
+            \draw (PQN.bpin 17) -- (Tr.bpin 4);
+            \draw (PQN.bpin 16) -- (Tr.bpin 5);
+            \draw (PQN.bpin 15) -- (Tr.bpin 6);
+            \draw (PQN.bpin 14) -- (Tr.bpin 7);
+            \draw (PQN.bpin 13) -- (Tr.bpin 8);
+            \draw (PQN.bpin 12) -- (Tr.bpin 9);
+            \draw (PQN.bpin 11) -- (Tr.bpin 10);
+        
+        \end{circuitikz}
+    \end{center}
+    \caption[Heterogeneous population schematic diagram]{The schematic diagram for the heterogeneous population differs from the one in figure \ref{fig:schematic} only in the number of voltages computed by the $PQN\ unit$ and sent to the $transmitter$.}
+    \label{fig:schematic3}
+\end{figure}
+
+The revised $PQN\ engine$ operates through a new process involving eight distinct stages (Figure \ref{fig:8stages}). 
+The initial stage involves the computation of \(v^2\). In the second ten shifted 
+values are calculated for each coefficient. In the third stage, these ten values 
+are summed in pairs. This results in five values, summed together in the fourth 
+and the fifth stages. In the sixth stage, nine coefficients become negative. The 
+seventh stage computes \(v_{out}\), \(n_{out}\), and \(q_{out}\). Finally, in the 
+eighth stage, these values are outputted.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+    \includegraphics[width=0.84\linewidth]{img/block_diagram2.png}
+    \end{center}
+    \caption[$PQN\ engine$ pipeline for variable coefficients]{PQN engine diagram for the three variables model that implement neuronal heterogeneity. $BS$ is the symbol indicating the barrel shifter.}
+    \label{fig:8stages}
+\end{figure}
+
+One current is received and ten voltages are transmitted. The baud rate has 
+thus been increased from 2 Mbits/s to 4 Mbits/s.\\
+Figure \ref{fig:ctc var} shows the stimulation of a heterogeneous population 
+of RSexci neurons with the same step input current.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+    \includegraphics[width=1\linewidth]{img/het_pop.PNG}
+    \end{center}
+    \caption[Stimulation of heterogeneous neurons]{Stimulation of 5 RSexci neurons with a step current. 
+    Although the neurons are all from the same class, their response to the same current is different.}
+    \label{fig:ctc var}
+\end{figure}
+
+The relevant code for this section can be found in the GitHub 
+repository called $cell-to-cell\_variability$\footnote{\url{https://github.com/gle0/PQN_thesis/tree/main/cell-to-cell_variability}}.\\

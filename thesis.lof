@@ -1,0 +1,35 @@
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces McCulloch-Pitts Neuron}}{12}{figure.caption.4}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Artificial Neuron}}{13}{figure.caption.5}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces Spiking Neuron}}{14}{figure.caption.6}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces Biohybrid System}}{17}{figure.caption.7}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Multiplexer}}{20}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Decoder}}{21}{figure.caption.9}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Latch}}{22}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Delay flip-flop}}{23}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Programmable Logic Devices notation}}{24}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Programmable Read Only Memory}}{25}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Look-Up Table in FPGA}}{28}{figure.caption.14}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Shape of the Action Potential}}{32}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Neuron morphology}}{33}{figure.caption.16}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces LIF model circuit}}{35}{figure.caption.17}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces LIF model functioning}}{36}{figure.caption.18}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Hodgkin-Huxley model circuit}}{38}{figure.caption.19}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces PQN model schematic diagram}}{47}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces $PQN\ unit$ schematic diagram}}{48}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Shifter's implementation for fixed coefficient multiplications}}{50}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces $PQN\ engine$ pipeline}}{52}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Stimulation of the 8 PQN model's modes}}{53}{figure.caption.24}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Multi-class population schematic diagram}}{56}{figure.caption.25}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Multiple classes population $PQN\ unit$ schematic diagram}}{57}{figure.caption.26}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Simulation of multiple classes population}}{58}{figure.caption.27}%
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Barrel shifter module}}{60}{figure.caption.28}%
+\contentsline {figure}{\numberline {5.5}{\ignorespaces Encoding a coefficient in a 50-bits array}}{61}{figure.caption.29}%
+\contentsline {figure}{\numberline {5.6}{\ignorespaces Heterogeneous population schematic diagram}}{62}{figure.caption.30}%
+\contentsline {figure}{\numberline {5.7}{\ignorespaces $PQN\ engine$ pipeline for variable coefficients}}{63}{figure.caption.31}%
+\contentsline {figure}{\numberline {5.8}{\ignorespaces Stimulation of heterogeneous neurons}}{64}{figure.caption.32}%
+\addvspace {10\p@ }

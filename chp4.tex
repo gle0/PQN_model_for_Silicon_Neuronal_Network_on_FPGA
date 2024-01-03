@@ -1,0 +1,301 @@
+\chapter{Neuromorphic hardware}
+\label{ch4}
+Software-based simulations of SNN models on conventional computers offer flexibility and control, but they consume considerable computational power and exhibit slow simulation speed. GENESIS \cite{Bower}, NEURON \cite{carnevale}, NEST \cite{Gewaltig}, Brian \cite{Goodman}, Auryn \cite{Zenke}, and EDEN \cite{Panagiotou} operate on conventional CPUs, ANNarchy \cite{Vitay}, GeNN \cite{Yavuz}, and Brian 2 \cite{Stimberg} provide GPU support.\\ 
+In contrast, \acrshort{sinn}s comprise electronic circuits designed to emulate \acrshort{snn} models. They enable power efficiency and support real-time or even accelerated-time simulations.\\
+
+\section{Analog and digital hardwares}
+Silicon neurons employing analog circuits exhibit exceptional power efficiency (1-10 pW/spike) but are sensitive to noise, mismatch, and variations in power, voltage, and temperature. Conversely, silicon neurons utilising digital circuits are considerably less sensitive to these factors. Although digital circuits consume more power (about one or two orders of magnitude) than their analog counterparts, they offer increased portability, ease of operation, and seamless integration. Typically, small-scale systems find bioinspired edge computing applications, while large-scale systems are tailored for cognitive computing purposes \cite{Frenkel2023}.\\
+
+Among the analog devices, the ROLLS chip \cite{Qiao} 
+incorporates 256 \acrshort{adex} neurons, the DYNAPs 
+chip \cite{Moradi} features a quad-core setup with 2k 
+neurons and 64k synapses, and Neurogrid 
+\cite{Benjamin}, a 1-million-neuron system, aims to 
+emulate the biophysics of cortical layers.\\
+Concerning digital, the small-scale design by 
+\cite{Seo} integrates 256 \acrshort{lif} neurons. The 
+ODIN chip accommodates 256 neurons with 20 Izhikevich behaviours \cite{FrenkelOdin}. 
+The MorphIC chip allows 
+large-scale multichip setups, totalling 2k 
+\acrshort{lif} neurons \cite{FrenkelMorphic}. 
+SpiNNaker adopts a distributed von Neumann approach 
+with a globally asynchronous locally synchronous 
+(GALS) design, covering biological to accelerated time 
+constants \cite{Painkras}.\\
+Large-scale networks have also been constructed using digital ASICs.  
+Intel Loihi \cite{Davies} supports up to 180k \acrshort{lif} neurons 
+with configurable compartments, incorporating functionalities such as 
+threshold adaptation, axonal and refractory delays and spike latency.
+IBM TrueNorth \cite{Merolla} has 1M neurons replicating 11 Izhikevich 
+behaviours or 20 if three neurons are combined \cite{Cassidy2013}.\\
+\acrshort{fpga}s are used in various scenarios, ranging from cognitive 
+computing \cite{Thomas,Cassidy2011,Li2012,Neil} to neuroscience applications 
+\cite{Luo,Khoyratee,Yang}.\\
+
+\section{Implementation of the PQN model}
+\label{section:PQNimpl}
+
+The work of \cite{Nanami} encapsulates a population of $N$ (9993) 
+identical neurons. This chip receives a step current as input, 
+calculates the state variables for each cell and outputs the voltage. 
+Depending on the selected bitstream file among the eight available options, 
+the population can consist of Class II, RS excitatory (RSexci), 
+RS inhibitory (RSinhi), FS, EB, PB, IB, or LTS equal neurons. 
+The design of these classes remains consistent, apart from the innermost 
+module called $PQN\ engine$ (Figure \ref{fig:schematic}). 
+All state variables are represented using an 18-bit fixed-point format, 
+incorporating an 8-bit integer part representation except for the Class II 
+mode that uses 28-bit format.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+        \begin{circuitikz}
+            \ctikzset{multipoles/dipchip/width=2}
+        
+            \node [left] at (-1,2.25) {$UART_{R}$};
+            \node [left] at (-1,1) {$CLK$};
+        
+            \node [below, font=\tiny] at (0,0.4) {$CLK\ generator$};
+            \draw (0,1) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](Clk){}; % , label={Clk generator}
+            \node [right, font=\tiny] at (Clk.bpin 3) {$C_{in}$};
+            \node [left, font=\tiny] at (Clk.bpin 8) {$C$};
+            % \node [left] at (-0.5,2) {$UART_{RXD}$};
+            \draw (Clk.bpin 3) -- (-1,1);
+        
+            \node [below, font=\tiny] at (2,-0.6) {$Trigger\ generator$};
+            \draw (2,0) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](T){}; %, label={Trigger generator}
+            \node [right, font=\tiny] at (T.bpin 3) {C};
+            \node [left, font=\tiny] at (T.bpin 8) {T};
+        
+            \node [above, font=\tiny] at (4,2.6) {$Receiver$};
+            \draw (4,2) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](R){}; %label={I Receiver}
+            \node [right, font=\tiny] at (R.bpin 2) {D};
+            \node [right, font=\tiny] at (R.bpin 3) {C};
+            \node [right, font=\tiny] at (R.bpin 4) {T};
+            \node [left, font=\tiny] at (R.bpin 8) {Q};
+            \draw (R.bpin 2) -- (-1,2.25);
+        
+            \node [above, font=\tiny] at (6,2.6) {$PQN_{unit}$};
+            \draw (6,2) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](PQN){}; %, label={PQN unit}
+            \node [right, font=\tiny] at (PQN.bpin 2) {I};
+            \node [right, font=\tiny] at (PQN.bpin 3) {C};
+            \node [right, font=\tiny] at (PQN.bpin 4) {T};
+            \node [left, font=\tiny] at (PQN.bpin 7) {I};
+            \node [left, font=\tiny] at (PQN.bpin 9) {V};
+        
+            \node [below, font=\tiny] at (8.1,1.4) {$Transmitter$};
+            \draw (8,2) node[dipchip, scale=0.5, num pins=10, hide numbers, 
+                no topmark, external pins width=0](Tr){}; %label={V Transmitter}
+            \node [right, font=\tiny] at (Tr.bpin 2) {V};
+            \node [right, font=\tiny] at (Tr.bpin 3) {I};
+            \node [right, font=\tiny] at (Tr.bpin 4) {C};
+            \node [right, font=\tiny] at (Tr.bpin 5) {T};
+            \node [left, font=\tiny] at (Tr.bpin 8) {Q};
+            \draw (Tr.bpin 8) -- ++ (0.5,0) node[right] {$UART_{T}$};
+        
+            \draw (T.bpin 8) -- ++ (4.5,0) |- (Tr.bpin 5);
+            \draw (T.bpin 8) -- ++ (2.5,0) |- (PQN.bpin 4);
+            \draw (T.bpin 8) -- ++ (0.5,0) |- (R.bpin 4);
+        
+            \draw[color=green] (Clk.bpin 8) -- ++ (6.35,0) |- (Tr.bpin 4); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (4.4,0) |- (PQN.bpin 3); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (2.4,0) |- (R.bpin 3); %[color=green]
+            \draw[color=green] (Clk.bpin 8) -- ++ (0.4,0) |- (T.bpin 3); %[color=green]
+        
+            \draw (R.bpin 8) -- ++ (0.2,0) |- (PQN.bpin 2);
+            \draw (PQN.bpin 7) -- ++ (0.2,0) |- (Tr.bpin 3);
+            \draw (PQN.bpin 9) -- ++ (0.2,0) |- (Tr.bpin 2);
+        
+        \end{circuitikz}
+    \end{center}
+    \caption[PQN model schematic diagram]{The schematic diagram of the \acrshort{pqn} model is equal for every class. 
+    $UART_{R}$ is the only signal received from the computer, and $UART_{T}$ the only one transmitted.
+    The output of the clock module is fed in any other following module, such as the the trigger signal.
+    The receiver communicates the input current to the $PQN\ unit$, which after calculating the voltage, gives it to the transmitter.}
+    \label{fig:schematic}
+\end{figure}
+
+\begin{figure}[hbt!]
+\begin{center}
+\begin{circuitikz}
+    \ctikzset{multipoles/dipchip/width=2}
+
+    \node [left] at (1.3,-1.5) {$PQN\ engine\ RS_{exci}$};
+    \draw (0,0) node[dipchip, scale=0.75, num pins=10, hide numbers, 
+        no topmark, external pins width=0](PU){}; % , label={Clk generator}
+    \node [right, font=\tiny] at (PU.bpin 1) {CLK};
+    \node [right, font=\tiny] at (PU.bpin 2) {I};
+    \node [right, font=\tiny] at (PU.bpin 3) {$v_{in}$};
+    \node [right, font=\tiny] at (PU.bpin 4) {$n_{in}$};
+    \node [right, font=\tiny] at (PU.bpin 5) {$q_{in}$};
+    \node [left, font=\tiny] at (PU.bpin 8) {$v_{out}$};
+    \node [left, font=\tiny] at (PU.bpin 7) {$n_{out}$};
+    \node [left, font=\tiny] at (PU.bpin 6) {$q_{out}$};
+    % \draw (PU.bpin 3) -- (-1,1);
+
+    \node [left] at (6.15,-0.8) {$RAM_{v}$};
+    \draw (5,0) node[dipchip, scale=0.75, num pins=10, hide numbers, 
+        no topmark, external pins width=0](V){}; %, label={Trigger generator}
+    \node [right, font=\tiny] at (V.bpin 2) {CLK};
+    \node [right, font=\tiny] at (V.bpin 3) {D};
+    \node [right, font=\tiny] at (V.bpin 4) {$wr$};
+    \node [right, font=\tiny] at (V.bpin 5) {$adr$};
+    \node [left, font=\tiny] at (V.bpin 8) {Q};
+    \draw (PU.bpin 8) -- (V.bpin 3);
+
+    \node [left] at (6.15,-3.3) {$RAM_{n}$};
+    \draw (5,-2.5) node[dipchip, scale=0.75, num pins=10, hide numbers, 
+        no topmark, external pins width=0](N){}; %, label={Trigger generator}
+    \node [right, font=\tiny] at (N.bpin 2) {CLK};
+    \node [right, font=\tiny] at (N.bpin 3) {D};
+    \node [right, font=\tiny] at (N.bpin 4) {$wr$};
+    \node [right, font=\tiny] at (N.bpin 5) {$adr$};
+    \node [left, font=\tiny] at (N.bpin 8) {Q};
+    \draw (PU.bpin 7) -- ++ (1,0) |- (N.bpin 3);
+
+    \node [left] at (6.15,-5.8) {$RAM_{q}$};
+    \draw (5,-5) node[dipchip, scale=0.75, num pins=10, hide numbers, 
+        no topmark, external pins width=0](Q){}; %, label={Trigger generator}
+    \node [right, font=\tiny] at (Q.bpin 2) {CLK};
+    \node [right, font=\tiny] at (Q.bpin 3) {D};
+    \node [right, font=\tiny] at (Q.bpin 4) {$wr$};
+    \node [right, font=\tiny] at (Q.bpin 5) {$adr$};
+    \node [left, font=\tiny] at (Q.bpin 8) {Q};
+    \draw (PU.bpin 6) -- ++ (0.5,0) |- (Q.bpin 3);
+
+    \draw[color=red] (Q.bpin 4) -- ++ (-0.4,0);
+    \draw[color=blue] (Q.bpin 5) -- ++ (-0.4,0);
+    \draw[color=red] (N.bpin 4) -- ++ (-0.4,0);
+    \draw[color=blue] (N.bpin 5) -- ++ (-0.4,0);
+    \draw[color=red] (V.bpin 4) -- ++ (-0.4,0);
+    \draw[color=blue] (V.bpin 5) -- ++ (-0.4,0);
+    \draw[color=green] (PU.bpin 1) -- ++ (-0.4,0);
+    \draw[color=green] (V.bpin 2) -- ++ (-0.4,0);
+    \draw[color=green] (N.bpin 2) -- ++ (-0.4,0);
+    \draw[color=green] (Q.bpin 2) -- ++ (-0.4,0);
+
+    \draw (Q.bpin 8) -- ++ (1.5,0) -- ++ (0,7.5) -- ++ (-10.6,0) -- ++ (0,-3.33) -- (PU.bpin 5);
+    \draw (N.bpin 8) -- ++ (1,0) -- ++ (0,4.5) -- ++ (-9.7,0) -- ++ (0,-2.4) -- (PU.bpin 4);
+    \draw (V.bpin 8) -- ++ (0.5,0) -- ++ (0,1.5) -- ++ (-8.7,0) -- ++ (0,-1.5) -- (PU.bpin 3);
+\end{circuitikz}
+\end{center}
+\caption[$PQN\ unit$ schematic diagram]{Inside the $PQN\ unit$, there is always a PQN engine and a specific number (2-4) of blocks of \acrshort{ram}.
+Here CLK and I are external signals (Figure \ref{fig:schematic}), while $wr$ and $adr$ are, respectively, the write enable and the address of the \acrshort{ram}. 
+These signals are internal to the $PQN\ unit$ and are equal for each \acrshort{ram}.}
+\label{fig:PQNunit}
+\end{figure}
+
+The hardware schematic diagram for this project is illustrated in figure \ref{fig:schematic}. 
+It is composed of the $PQN\ unit$, $receiver$, $transmitter$, $trigger\ generator$, and $clock$ modules.\\
+
+The $receiver$ and $transmitter$ modules facilitate communication with the host \acrshort{pc}. 
+The $transmitter$ takes the voltage (V) and current (I), outputs from the $PQN\ unit$, 
+and encodes these 18-bit values into a 3-byte format. The $uart\ txd\ ctrl$ submodule manages the 
+transmission aspect of the UART communication protocol, sending these 3-byte words to the computer bit by bit. 
+Meanwhile, the $uart\ rxd\ ctrl$ submodule handles the reception part of the UART, assembling 
+received bits into 3-byte words. The $receiver$ then decodes the 3-byte word into an 18-bit value and stores it in a \acrshort{ram} block. 
+Subsequently, this value is fed back as an input current to the $PQN\ unit$. 
+Therefore, the $transmitter$ transfers a single voltage and a single current, 
+while the $receiver$ receives only one current value. The $clock$ is an \acrshort{ip} used to 
+synchronise data transmission with the \acrshort{fpga}'s internal clock, and the $trigger\ generator$ 
+generates a trigger signal every 0.1 ms.\\
+
+The $PQN\ unit$ (Figure \ref{fig:PQNunit}) comprises the $PQN\ engine$ and \acrshort{ram} blocks. 
+Here, $N$ denotes the number of neurons processed by one $PQN\ unit$. The $PQN\ unit$ operation 
+is straightforward — it retrieves the state variable values from a \acrshort{ram} and inputs them into the $PQN\ engine$. 
+Simultaneously, it obtains an output (state variables) from the $PQN\ engine$ and stores them back into the \acrshort{ram}. 
+The \acrshort{ram} blocks store the state variable values during each cycle, and each block is dedicated to a single state variable.\\
+The described structure remains consistent across all neural classes, with variations solely in the number of \acrshort{ram}s utilised 
+based on the simulated class. Instead, the $PQN\ engine$ serves as the computational core for the neuron and varies depending on the neural class. 
+It calculates the differential equation of the specific class using the Euler method.\\
+
+The focus of this section is on the implementation of the three-variables model. 
+The computation of the \(x_{out}\) is done summing to \(x_{in}\) additional terms 
+(Equations \ref{eq:RS1}-\ref{eq:RS3}). 
+These terms consist of constants or variables derived from the differential 
+equations discussed in Chapter \ref{subsection:PQN}. The variable terms are 
+computed by multiplying the state variables and the input current \(I_{in}\) 
+with a set of 17 constant coefficients obtained through experimental parameter 
+calculations. In particular, the variables depending on \(v\) and \(v^2\) needs 
+two coefficients each, the ones depending on \(I_{in}\), \(n\) and \(q\) only one, 
+while the dependence on \(x\) indicates a constant.
+
+\begin{equation}
+    v_{out} <= v_{in} + v_{vv} + v_{v} + v_{x} + v_{n} + v_{q} + v_{Iin}
+    \label{eq:RS1}
+\end{equation}
+
+\begin{equation}
+    n_{out} <= n_{in} + n_{vv} + n_{v} + n_{x} + n_{n}
+    \label{eq:RS2}
+\end{equation}
+
+\begin{equation}
+    q_{out} <= q_{in} + q_{vv} + q_{v} + q_{x} + q_{q}
+    \label{eq:RS3}
+\end{equation}
+
+The multiplication operations between variables and coefficients are executed 
+using shifters and adders (Figure \ref{fig:shift}). Employing a shifter is a more 
+efficient multiplication method than using a dedicated multiplier. This 
+efficiency arises from the binary nature of the values, where multiplication 
+by 2 is effectively a left shift of one position (towards most significant bit), 
+and multiplication by 0.5 is a right shift (towards less significant bit). Given that, the values of the parameters have a direct impact on the utilisation of circuit resources. Each additional number of ones in the binary representation of the coefficients consumes an additional pair of shifters and adders.\\
+
+\begin{figure}[hbt!]
+    \begin{lstlisting}[basicstyle=\ttfamily\small, linewidth=0.1\textwidth]
+    -- x * 0.16064453125 (= 00000000.00101001001000000000)
+    x_0 <= "000" & x(17 downto 0) & "00000" when x(17)='0' 
+        else "111" & x(17 downto 0) & "00000";
+    x_1 <= "00000" & x(17 downto 0) & "000" when x(17)='0' 
+        else "11111" & x(17 downto 0) & "000";
+    x_2 <= "00000000" & x(17 downto 0) & "" when x(17)='0' 
+        else "11111111" & x(17 downto 0) & "";
+    x_3 <= "00000000000" & x(17 downto 3) & "" when x(17)='0' 
+        else "11111111111" & x(17 downto 3) & "";
+    x_4 <= x_0 + x_1 + x_2 + x_3;
+    x_product <= x_4(25 downto 8);
+    \end{lstlisting}
+\caption[Shifter's implementation for fixed coefficient multiplications]{Example: the binary representation of 0.16064453125 is done utilising four 1-bits, respectively, in position 3, 5, 8 and 11. To multiply a variable (x) by this coefficient it’s thus necessary a left shift of 3 positions ($x_{0}$), one of 5 ($x_{1}$), one of 8 ($x_{2}$), and one of 11 ($x_{3}$) and sum these four values together.}
+    \label{fig:shift}
+\end{figure}
+
+\begin{figure}[hbt!]
+    \begin{center}
+    \includegraphics[width=0.7\linewidth]{img/block_diagram.png}
+    \end{center}
+    \caption[$PQN\ engine$ pipeline]{$PQN\ engine$ diagram for the three variables model. Starting from the inputs $v$, $n$, $q$ and $I_{stim}$, the $PQN\ engine$ computes the outputs $v_{next}$, $n_{next}$ and $q_{next}$ using multipliers (×), adders (+), multiplexers (M), and
+    comparators (C).}
+    \label{fig:RSstages}
+\end{figure}
+
+For each clock cycle, the $PQN\ engine$ computes the next step of the state variables based on their previous values (Figure \ref{fig:RSstages}). 
+It takes the module 4 cycles to calculate the next step, employing a pipelined architecture. A pipeline is a sequence of stages, each performing a 
+part of the overall task. Each stage completes a portion of the operations and passes the partial result to the next stage. 
+By passing incomplete tasks down the pipeline, each stage can initiate work on a new task without waiting for the overall task to conclude \cite{Dally}. 
+This pipelined structure computes a new value every cycle after the initial four cycles.\\
+
+The only multiplier in the entire code is used for calculating $v^2$. This is accomplished during the initial stage (Figure \ref{fig:RSstages}). 
+Subsequently, the second stage involves the multiplication of variables and coefficients. In the third stage, the module calculates \(v_{next}\), \(n_{next}\),
+ and \(q_{next}\), and in the fourth stage, these values are outputted.\\
+For real-time simulation with a 100 MHz clock and a time step of 0.1 ms, up to 10,000 cycles 
+can be consumed to update all state variables. Considering that the PQN engine requires four cycles 
+and read/write operations to the RAM necessitate three clocks, the maximum number of neurons (N) is 9993.\\
+It's crucial to emphasize that, although synaptic currents are calculated, they are not applied or utilized in this work.
+As a result, the neurons in the population are not interconnected.\\
+
+The \acrshort{fpga} is stimulated from the computer using a Python code. 
+The number of bits transmitted per second (Baud Rate) is set at 1 Mbits/s. 
+Figure \ref{fig:RSexci} illustrates the result of the stimulation of each one of the 8 modes.\\
+
+\begin{figure}[hbt!]
+    \begin{center}
+    \includegraphics[width=0.65\linewidth]{img/all.png}
+    \end{center}
+    \caption[Stimulation of the 8 PQN model's modes]{Simulation of the 8 modes of the \acrshort{pqn} model. Each class is stimulated using a different step current during 1s. \acrshort{pb} and \acrshort{eb} are stimulated using a continuous current instead.}
+    \label{fig:RSexci}
+\end{figure}

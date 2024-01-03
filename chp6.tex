@@ -1,0 +1,65 @@
+\chapter{Outlook}
+\label{ch6}
+The \acrshort{pqn} model ensures biological accuracy while maintaining lower power 
+consumption than conductance-based models. It can model various neuron classes and 
+guarantees efficient implementation through digital circuits. Its \acrshort{fpga} 
+application offers high flexibility and represents an ultralow-power, large-scale, 
+general-purpose silicon neuronal network platform.\\
+The two designs introduced in this study both contribute to increasing the 
+biological features. The first project consolidates the four principal electrophysiological 
+classes of cortical and thalamic neurons into a single device, while the second one introduces 
+intraclass variability. The common objective is the development of a silicon thalamocortical network.\\
+To further advance the project, future endeavours should focus on reducing \acrshort{fpga} 
+resource utilisation, integrating both designs synergistically, and incorporating synapses.\\
+
+While the applications of these devices are yet to be explored, the expectations are exceedingly high. 
+A multitude of event-based sensors has already been developed, such as silicon retina \cite{Mahowald}, 
+silicon cochlea \cite{Lyon,Liu}, neuromorphic vestibular systems \cite{Corradi}, neuromorphic olfactory 
+circuit \cite{Koickal}, and touch \cite{Bartolozzi}.\\
+In addition to perception and inference, the event-based paradigm also applies 
+to control \cite{Yamazaki}. Various methods have been proposed to achieve locomotion 
+in a range of robots, employing a \acrfull{cpg}. It is a neural network 
+wherein interconnected excitatory and inhibitory neurons generate an oscillatory, 
+rhythmic output without requiring rhythmic inputs \cite{Katz}.\\
+
+Moreover, the recent availability of extensive anatomical and physiological data 
+has led to the development of data-driven conductance-based \acrshort{snn} 
+models \cite{Markram,Bezaire,Ecker} with the ambitious goal of replicating 
+the mammalian brain. The significant computational demand of these 
+conductance-based models precludes their widespread use and the construction 
+of larger-scale networks \cite{Bezaire}. In contrast, \acrshort{snn}s employing the 
+\acrshort{pqn} model demonstrate a remarkable reduction in power consumption, 
+making them a promising tool for these applications \cite{Nanami}.\\
+Furthermore, representing a bottom-up approach with cell-level granularity 
+and accurately replicating complex spiking activities of neurons, these \acrshort{sinn}s
+are well-suited for artificially recreating brain regions \cite{KohnoR}. 
+Consequently, it holds potential applications in biohybrid systems, including 
+neuroprosthetic devices designed to treat neurological disorders and injuries \cite{Chiappalone}.\\
+
+Brain disorders represent a leading cause of global disabilities, 
+and current pharmacological treatments, along with the limited availability 
+of robotic aids, fall short in providing effective solutions. This situation 
+necessitates a re-evaluation of methodologies for studying human cells and addressing 
+brain-related illnesses. A promising avenue in this pursuit is the exploration of 
+\enquote{hybrid neuromorphic engineering} which involves integrating technological devices 
+with biological neurons to devise innovative solutions \cite{Khoyratee}. Novel 
+approaches to brain repair \cite{BUCCELLI} or replacement \cite{Jung,Ambroise}, 
+that establish adaptive bidirectional communication through a real-time 
+closed-loop architecture between biological and artificial components have 
+emerged. This approach aims to overcome the limitations of current treatments 
+by fostering dynamic interactions between biological and artificial systems.\\ 
+Notably, the characteristics of SiNNs studied in this project align well with the 
+need for a trade-off between the complexity of computational models, energy 
+consumption, and real-time constraints inherent in these applications. The use 
+of a \acrshort{sinn} employing the PQN model presents an exciting prospect in this context. 
+Furthermore, the selection of FPGA hardware is a strategic choice to optimise the 
+system's real-time performance. This not only addresses the need for efficient computation but 
+also accelerates the development of an implanted bioelectronic device, offering potential 
+applications in the biomedical field in the future.\\
+
+This integrated approach holds promise for advancing our capabilities in treating 
+and understanding brain-related disorders. Moreover,
+exploring the interaction between artificial devices and living cells raises 
+questions about the essence of intelligence and cognition. This offers the potential 
+to find the boundary between the artificial and the biological life, other than the 
+charming possibility of stumbling upon plausible answers to those questions.\\
